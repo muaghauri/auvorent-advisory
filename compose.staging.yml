@@ -1,0 +1,38 @@
+# STAGING ONLY: bind CMS to local loopback; place a TLS proxy in front for remote access.
+# Fill an external .env file with unique secrets before using. Do not commit it.
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: auvorent
+      POSTGRES_DB: auvorent
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL","pg_isready -U auvorent -d auvorent"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  cms:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db: {condition: service_healthy}
+    env_file: .env
+    environment:
+      CMS_ENV: production
+      CMS_DATABASE_URL: ${CMS_DATABASE_URL:?Set PostgreSQL database URL}
+      CMS_SECRET_KEY: ${CMS_SECRET_KEY:?Set a unique 32+ character secret}
+      CMS_SESSION_SECURE: 'true'
+      CMS_MEDIA_ROOT: /data/media
+      CMS_PUBLISH_ROOT: /data/publishing
+      CMS_ENABLE_PRODUCTION_EXPORT: 'false'
+    volumes:
+      - cmsdata:/data
+    ports:
+      - '127.0.0.1:8900:8900'
+volumes:
+  pgdata:
+  cmsdata:

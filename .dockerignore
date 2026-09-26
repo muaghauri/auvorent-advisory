@@ -1,0 +1,10 @@
+.git
+.venv
+.env
+*.sqlite
+__pycache__
+.pytest_cache
+instance
+previews
+*.zip
+tests

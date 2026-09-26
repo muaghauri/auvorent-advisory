@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#102638">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="description" content="Private Auvorent Advisory CMS administration. Authorized users only.">
+  <title>Auvorent Advisory — Content Management</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/admin.css">
+  <script src="/static/admin.js" defer></script>
+  <script src="/static/phase3.js" defer></script>
+  <script src="/static/phase4.js" defer></script>
+  <script src="/static/phase5.js" defer></script>
+  <script src="/static/phase6.js" defer></script>
+  <link rel="stylesheet" href="/static/phase6.css">
+  <link rel="stylesheet" href="/static/phase5.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <section id="login-view" class="login-view hidden" aria-labelledby="login-title">
+    <div class="login-aside">
+      <img class="login-brand" src="/static/logo-light.svg" alt="Auvorent Advisory">
+      <div class="login-copy">
+        <span class="eyebrow light">AUVORENT CONTENT STUDIO</span>
+        <h1>Clarity across every touchpoint.</h1>
+        <p>A secure workspace to maintain the quality and consistency of your advisory firm's digital presence.</p>
+        <div class="login-line"><span></span><small>EXECUTIVE INTELLIGENCE · V6 DESIGN SYSTEM</small></div>
+      </div>
+      <div class="login-grid" aria-hidden="true"></div>
+    </div>
+    <div class="login-panel">
+      <div class="login-box">
+        <span class="eyebrow">SECURE ADMIN ACCESS</span>
+        <h2 id="login-title">Welcome back.</h2>
+        <p class="muted">Sign in with your authorized Auvorent CMS account.</p>
+        <form id="login-form" class="stack" autocomplete="on">
+          <label for="login-email">Work email <span class="required" aria-label="required">*</span></label>
+          <input id="login-email" name="email" type="email" placeholder="name@yourcompany.com" autocomplete="username" required>
+          <label for="login-password">Password <span class="required" aria-label="required">*</span></label>
+          <input id="login-password" name="password" type="password" placeholder="Your password" autocomplete="current-password" required>
+          <p class="notice error hidden" id="login-error" role="alert"></p>
+          <button id="login-submit" class="button primary full" type="submit">Sign in <span aria-hidden="true">↗</span></button>
+        </form>
+        <p class="login-help">First-time setup? Your system administrator must create your account. Email-based password recovery is not yet enabled; contact your system administrator.</p>
+      </div>
+      <p class="login-foot">Private management platform · Auvorent Advisory</p>
+    </div>
+  </section>
+
+  <div id="shell" class="shell hidden">
+    <aside class="sidebar" id="sidebar" aria-label="Primary admin navigation">
+      <div class="sidebar-brand"><img src="/static/logo-light.svg" alt="Auvorent Advisory"><span>CONTENT MANAGEMENT</span></div>
+      <div class="sidebar-subtitle">WORKSPACE</div>
+      <nav class="side-nav" aria-label="CMS modules">
+        <button class="nav-link active" data-view="dashboard" type="button" aria-current="page"><svg class="ico"><use href="#i-grid"></use></svg><span>Overview</span></button>
+        <button class="nav-link" data-view="roadmap" type="button"><svg class="ico"><use href="#i-layers"></use></svg><span>Development modules</span></button>
+        <div class="sidebar-subtitle secondary">CONTENT STUDIO <span>ALL MODULES</span></div>
+        <button id="pages-tab" class="nav-link" data-view="pages" type="button"><svg class="ico"><use href="#i-file"></use></svg><span>Pages & sections</span><span class="mini-tag live">02</span></button>
+        <button id="navigation-tab" class="nav-link" data-view="navigation" type="button"><svg class="ico"><use href="#i-layers"></use></svg><span>Navigation</span></button>
+        <button id="settings-tab" class="nav-link" data-view="settings" type="button"><svg class="ico"><use href="#i-settings"></use></svg><span>Site settings</span></button>
+        <button id="collections-tab" class="nav-link" data-view="collections" type="button"><svg class="ico"><use href="#i-layers"></use></svg><span>Collections & insights</span><span class="mini-tag live">03</span></button>
+        <button id="media-tab" class="nav-link" data-view="media" type="button"><svg class="ico"><use href="#i-image"></use></svg><span>Media & custom icons</span></button>
+        <button id="publishing-tab" class="nav-link" data-view="publishing" type="button"><svg class="ico"><use href="#i-globe"></use></svg><span>SEO & publishing</span><span class="mini-tag live">05</span></button>
+        <button id="leads-tab" class="nav-link" data-view="leads" type="button"><svg class="ico"><use href="#i-inbox"></use></svg><span>Leads & assessments</span><span class="mini-tag live">04</span></button>
+        
+        <div class="sidebar-subtitle secondary">ADMINISTRATION</div>
+        <button class="nav-link hidden" id="users-tab" data-view="users" type="button"><svg class="ico"><use href="#i-users"></use></svg><span>Team & access</span></button>
+        <button class="nav-link hidden" id="audit-tab" data-view="audit" type="button"><svg class="ico"><use href="#i-shield"></use></svg><span>Security & audit</span></button>
+        <button class="nav-link" data-view="profile" type="button"><svg class="ico"><use href="#i-settings"></use></svg><span>My account</span></button>
+      </nav>
+      <div class="sidebar-bottom"><span class="status-dot"></span><span>Phase 6 · V6 integrated staging</span></div>
+    </aside>
+    <div class="workspace">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button id="mobile-menu" class="icon-button mobile-menu" aria-label="Toggle menu" aria-controls="sidebar" aria-expanded="false" type="button"><svg class="ico"><use href="#i-menu"></use></svg></button>
+          <div><span class="topbar-caption">AUVORENT / ADMIN</span><strong id="topbar-title">Overview</strong></div>
+        </div>
+        <div class="topbar-right">
+          <span class="status-pill"><span class="status-dot"></span>Local CMS workspace</span>
+          <span id="topbar-username" class="topbar-user">Administrator</span>
+          <button id="logout" class="button secondary small" type="button">Sign out</button>
+        </div>
+      </header>
+      <main id="main-content" tabindex="-1" class="main-content">
+        <div id="toast" role="status" aria-live="polite" class="toast hidden"></div>
+        <section id="view-dashboard" class="view" aria-labelledby="dashboard-title">
+          <div class="page-heading"><div><span class="eyebrow">CONTROL CENTER</span><h1 id="dashboard-title">A clear view of your platform.</h1><p>Control the V6 website, publishing workflows, inquiries and production-readiness checks in one secure CMS.</p></div><span class="phase-label">PHASE 06 / 06</span></div>
+          <div class="stats-grid">
+            <article class="stat-card"><span>Registered CMS users</span><strong id="metric-users">—</strong><small>All CMS user accounts</small></article>
+            <article class="stat-card"><span>Active accounts</span><strong id="metric-active">—</strong><small>Currently enabled</small></article>
+            <article class="stat-card"><span>Active sessions</span><strong id="metric-sessions">—</strong><small>Not expired or revoked</small></article>
+            <article class="stat-card"><span>Recorded security events</span><strong id="metric-audit">—</strong><small>Audit trail entries</small></article>
+          </div>
+          <div class="overview-grid">
+            <section class="feature-panel"><div class="panel-eyebrow">DELIVERY STATUS</div><h2>Build the foundation. Then build with confidence.</h2><p>The secure foundation is complete. Page Studio manages V6 page records and Phase 3 adds services, industries, insights, secure media, custom icons and content relationships.</p><div class="progress-rail"><div></div></div><span class="progress-note">6 of 6 modules implemented · V6 staging integration ready</span><button type="button" class="button primary" data-view="roadmap">Explore the roadmap <span aria-hidden="true">↗</span></button></section>
+            <section class="aside-panel"><div class="panel-eyebrow">WEBSITE CONNECTION</div><h2>V6 website baseline</h2><strong class="baseline-number">17 <span>content routes</span></strong><p>Documented in the V6 master file. V6 pages, assets and forms now render from approved CMS data into private staging; production release remains separately gated.</p><div class="integration-state"><span class="pending-dot"></span>Staging integration ready</div></section>
+          </div>
+          <section class="lower-panel"><div><span class="eyebrow">SECURITY FIRST</span><h2>Security controls are built into the foundation.</h2><p>Argon2id password hashing, HTTP-only sessions, same-origin CSRF defenses, role-based permissions and tracked administrative changes.</p></div><div class="security-points"><span>Private admin access</span><span>Role-based permissions</span><span>Append-only audit API</span><span>Migration-ready database</span></div></section>
+        </section>
+        <section id="view-roadmap" class="view hidden" aria-labelledby="roadmap-title">
+          <div class="page-heading"><div><span class="eyebrow">BUILD PROGRAM</span><h1 id="roadmap-title">Six modules. One connected platform.</h1><p>Each delivery has its own acceptance criteria, tests, and handover package.</p></div></div>
+          <div id="roadmap-cards" class="roadmap-list"></div>
+        </section>
+        <section id="view-pages" class="view hidden" aria-labelledby="pages-title">
+          <div class="page-heading"><div><span class="eyebrow">PAGE STUDIO</span><h1 id="pages-title">Structure every page with intent.</h1><p>Edit V6 page records and modular content without changing frontend code.</p></div><button class="button primary" id="add-page" type="button">+ New page</button></div>
+          <div class="studio-layout">
+            <section class="table-panel studio-list"><div class="table-head"><h2>Website pages</h2><label class="search-wrap"><span class="sr-only">Search pages</span><input id="page-search" type="search" placeholder="Search pages or routes"></label></div><div id="pages-list" class="page-record-list"></div><p id="pages-empty" class="empty-state hidden">No pages found.</p></section>
+            <section class="table-panel editor-panel" id="page-editor-empty"><div class="empty-editor"><span class="eyebrow">SELECT A PAGE</span><h2>Choose a page to edit its structure.</h2><p>Page metadata and modular sections will appear here.</p></div></section>
+            <section class="table-panel editor-panel hidden" id="page-editor">
+              <div class="editor-head"><div><span class="eyebrow">PAGE DETAILS</span><h2 id="editor-page-title">—</h2><p id="editor-page-route">—</p></div><span id="editor-status" class="badge"></span></div>
+              <form id="page-form" class="editor-form">
+                <div class="field-grid"><label>Page title<input id="edit-page-title" required maxlength="180"></label><label>Route<input id="edit-page-route" required maxlength="240"></label><label>Slug<input id="edit-page-slug" required maxlength="180"></label><label>Template<input id="edit-page-template" maxlength="80"></label></div>
+                <div class="field-grid"><label>Status<select id="edit-page-status"><option value="draft">Draft</option><option value="unpublished">Unpublished</option><option value="archived">Archived</option></select></label><label class="check-label"><input id="edit-page-nav" type="checkbox"> Show in navigation</label><label class="check-label"><input id="edit-page-index" type="checkbox"> Indexable</label></div>
+                <label>SEO title<input id="edit-seo-title" maxlength="180"></label><label>Meta description<textarea id="edit-meta-description" rows="3" maxlength="320"></textarea></label>
+                <div class="form-actions"><button class="button primary" type="submit">Save page</button><button class="button secondary" id="refresh-page" type="button">Reset</button></div>
+              </form>
+              <div class="section-heading"><div><span class="eyebrow">MODULAR CONTENT</span><h2>Sections</h2></div><button id="add-section" class="button secondary small" type="button">+ Add section</button></div>
+              <div id="sections-list" class="section-list"></div>
+            </section>
+          </div>
+        </section>
+        <section id="view-navigation" class="view hidden" aria-labelledby="navigation-title">
+          <div class="page-heading"><div><span class="eyebrow">GLOBAL STRUCTURE</span><h1 id="navigation-title">Navigation that stays consistent.</h1><p>Manage header, footer and utility links from one source.</p></div><button class="button primary" id="save-navigation" type="button">Save navigation</button></div>
+          <section class="table-panel"><div class="table-head"><h2>Navigation items</h2><button id="add-nav-item" class="button secondary small" type="button">+ Add link</button></div><div id="navigation-list" class="navigation-editor"></div></section>
+        </section>
+        <section id="view-settings" class="view hidden" aria-labelledby="settings-title">
+          <div class="page-heading"><div><span class="eyebrow">GLOBAL SETTINGS</span><h1 id="settings-title">One source for the brand essentials.</h1><p>Manage approved brand, CTA, canonical and footer defaults.</p></div></div>
+          <form id="settings-form" class="settings-grid">
+            <section class="table-panel"><div class="panel-eyebrow">BRAND</div><label>Display name<input data-setting="brand.display_name"></label><label>Tagline<textarea data-setting="brand.tagline" rows="3"></textarea></label><label>Dark logo path<input data-setting="brand.logo_dark"></label><label>Light logo path<input data-setting="brand.logo_light"></label></section>
+            <section class="table-panel"><div class="panel-eyebrow">PRIMARY CTA</div><label>CTA label<input data-setting="contact.primary_cta_label"></label><label>CTA URL<input data-setting="contact.primary_cta_url"></label><div class="panel-eyebrow setting-gap">SEO DEFAULTS</div><label>Default title<input data-setting="seo.default_title"></label><label>Default description<textarea data-setting="seo.default_description" rows="3"></textarea></label><label>Canonical base<input data-setting="seo.canonical_base"></label></section>
+            <section class="table-panel"><div class="panel-eyebrow">FOOTER</div><label>Copyright line<input data-setting="footer.copyright"></label><p class="helper">Form-recipient and email-provider settings arrive in Phase 4 so secrets and delivery workflows remain properly isolated.</p></section>
+            <div class="settings-actions"><button class="button primary" type="submit">Save global settings</button></div>
+          </form>
+        </section>
+        <section id="view-collections" class="view hidden" aria-labelledby="collections-title">
+          <div class="page-heading"><div><span class="eyebrow">CONTENT COLLECTIONS · PHASE 03</span><h1 id="collections-title">Expertise, organized for growth.</h1><p>Manage services, industries, articles, author profiles, case studies and your team. Everything stays in a CMS draft until the publishing phase.</p></div><button id="collection-new" class="button primary" type="button" data-edit-only>+ New record</button></div>
+          <div id="collection-tabs" class="collection-tabs" role="tablist" aria-label="Content type"></div>
+          <div class="studio-layout collection-layout">
+            <section class="table-panel studio-list"><div class="table-head"><h2 id="collection-list-title">Services</h2><label class="search-wrap"><span class="sr-only">Search collection records</span><input id="collection-search" type="search" placeholder="Search by title or slug"></label></div><div id="collection-list" class="page-record-list"></div><p id="collection-empty" class="empty-state hidden">No content records. Create your first draft.</p></section>
+            <section class="table-panel editor-panel"><div id="collection-editor-empty" class="empty-editor"><span class="eyebrow">SELECT A RECORD</span><h2>Editorial control, from one workspace.</h2><p>Select a record to edit or create your first draft. The approved site design is not modified by these changes.</p></div>
+              <div id="collection-editor" class="hidden"><div class="editor-head"><div><span class="eyebrow" id="collection-editor-type">COLLECTION EDITOR</span><h2 id="collection-editor-name">New record</h2><p id="collection-editor-route">Draft content</p></div><span id="collection-editor-status" class="badge">Draft</span></div>
+                <form id="collection-form" class="editor-form">
+                  <div class="field-grid"><label>Title <span class="required">*</span><input id="collection-title" required maxlength="200"></label><label>Slug <span class="required">*</span><input id="collection-slug" required maxlength="180" placeholder="business-diagnostics" pattern="[a-z0-9]+(-[a-z0-9]+)*"></label></div>
+                  <label>Summary<textarea id="collection-summary" rows="3" maxlength="1600" placeholder="A specific, useful explanation of the client value."></textarea></label>
+                  <label>Detailed content (Markdown)<textarea id="collection-body" rows="9" placeholder="Write for business owners. Describe the problem, what you investigate and what happens next."></textarea></label>
+                  <div class="field-grid"><label>Content status<select id="collection-status"><option value="draft">Draft</option><option value="unpublished">Unpublished</option><option value="archived">Archived</option></select></label><label>Display order<input id="collection-order" type="number" min="0" max="100000" value="0"></label></div>
+                  <div class="field-grid"><label>Hero image<select id="collection-hero-media"><option value="">No hero image</option></select></label><label>Custom SVG icon<select id="collection-icon-media"><option value="">No custom icon</option></select></label></div>
+                  <label class="check-label"><input type="checkbox" id="collection-featured"> Feature this record</label>
+                  <details class="advanced-details"><summary>Structured content (advanced)</summary><p class="helper">JSON object for structured deliverables, challenges, process steps or author credentials. HTML and scripts are not supported.</p><textarea id="collection-json" rows="7" class="mono-field">{}</textarea></details>
+                  <div class="setting-gap"><div class="panel-eyebrow">SEARCH METADATA · DRAFT</div><div class="field-grid"><label>SEO title<input id="collection-seo-title" maxlength="180"></label><label>Meta description<textarea id="collection-meta" maxlength="320" rows="3"></textarea></label></div></div>
+                  <div class="form-actions"><button type="submit" class="button primary" data-edit-only>Save draft</button><button type="button" id="collection-delete" class="button secondary" data-edit-only>Delete draft</button><button type="button" id="collection-reset" class="button secondary">Reset</button></div>
+                </form>
+                <section id="collection-relations-panel" class="relations-panel hidden"><div class="section-heading"><div><span class="eyebrow">CONNECTED CONTENT</span><h2>Relationships</h2></div></div><p class="helper">Link an article to an author, a service to an industry or related editorial content. Links are stored using permanent CMS IDs.</p><div id="collection-relations" class="relations-list"></div><div class="relation-add" data-edit-only><label>Relation<select id="relation-type"><option value="related">Related</option><option value="author">Author</option><option value="featured">Featured</option><option value="supports">Supports</option><option value="relevant_to">Relevant to</option></select></label><label>Content<select id="relation-target"></select></label><button type="button" class="button secondary small" id="relation-add">Add link</button></div></section>
+              </div>
+            </section>
+          </div>
+        </section>
+        <section id="view-media" class="view hidden" aria-labelledby="media-title">
+          <div class="page-heading"><div><span class="eyebrow">ASSET STUDIO · PHASE 03</span><h1 id="media-title">Every visual, managed with care.</h1><p>Search, upload and assign approved imagery and theme-only custom icons. Uploaded files remain private CMS assets until publication.</p></div><span class="phase-label">PRIVATE LIBRARY</span></div>
+          <div class="media-layout">
+            <section class="table-panel media-list-panel"><div class="table-head"><h2>Media library <small id="media-count">0 assets</small></h2><input type="search" id="media-search" placeholder="Search filename or alt text" aria-label="Search media"></div><div class="media-filter"><button type="button" class="active" data-media-filter="">All</button><button type="button" data-media-filter="image">Images</button><button type="button" data-media-filter="icon">Icons</button><button type="button" data-media-filter="document">Documents</button></div><div id="media-grid" class="media-grid"></div><p id="media-empty" class="empty-state hidden">No media matches this search.</p></section>
+            <div class="media-aside"><section class="table-panel"><div class="panel-eyebrow">UPLOAD AN ASSET</div><h2>Bring your approved assets together.</h2><form id="media-upload-form" class="editor-form"><label>File <span class="required">*</span><input type="file" id="media-file" accept=".jpg,.jpeg,.png,.webp,.svg,.pdf" required></label><div class="field-grid"><label>Category<select id="media-kind"><option value="image">Business image</option><option value="icon">Custom SVG icon</option><option value="document">PDF document</option></select></label><label id="media-icon-style-wrap" class="hidden">Icon style<select id="media-icon-style"><option value="line">Theme line art</option><option value="filled">Theme filled art</option></select></label></div><label>Alt text<input id="media-alt" maxlength="300" placeholder="Describe the image or mark it decorative"></label><label class="check-label"><input id="media-decorative" type="checkbox"> Decorative image (no alt text required)</label><label>Caption<input id="media-caption" maxlength="500"></label><label>Copyright / source notes<textarea id="media-source" rows="2" maxlength="500" placeholder="Confirm rights before public use."></textarea></label><button class="button primary full" type="submit" data-edit-only>Upload to private library</button><p class="helper">Maximum 10 MB. SVG icons are sanitized, limited to the approved colors, and cannot contain scripts or external resources.</p></form></section>
+              <section id="media-detail" class="table-panel hidden"><div class="panel-eyebrow">SELECTED ASSET</div><h2 id="media-detail-title">—</h2><div id="media-detail-preview" class="media-detail-preview"></div><form id="media-edit-form" class="editor-form"><label>Alt text<input id="media-edit-alt" maxlength="300"></label><label>Caption<input id="media-edit-caption" maxlength="500"></label><label>Source notes<textarea id="media-edit-source" rows="2" maxlength="500"></textarea></label><label class="check-label"><input id="media-edit-decorative" type="checkbox"> Decorative</label><div class="form-actions"><button type="submit" class="button secondary small" data-edit-only>Save metadata</button><button type="button" id="media-delete" class="button secondary small" data-edit-only>Delete</button></div></form><label class="replace-label" data-edit-only>Replace file, preserving asset ID<input type="file" id="media-replace" accept=".jpg,.jpeg,.png,.webp,.svg,.pdf"></label>
+                 <div class="setting-gap"><div class="panel-eyebrow">ASSET USAGE</div><div id="media-usages"></div><div class="relation-add" data-edit-only><label>Page<select id="media-page"><option value="">Select page</option></select></label><label>Section<select id="media-section"><option value="">Select section</option></select></label><label>Slot<select id="media-slot"><option value="image">Image</option><option value="illustration">Illustration</option><option value="icon">Icon</option></select></label><button type="button" class="button secondary small" id="media-attach">Assign</button></div></div>
+              </section></div>
+          </div>
+        </section>
+
+        <!-- Phase 4: leads and assessments. All live data comes from authenticated APIs. -->
+        <section id="view-leads" class="view hidden" aria-labelledby="leads-title">
+          <div class="page-heading"><div><span class="eyebrow">LEAD MANAGEMENT · PHASE 04</span>
+            <h1 id="leads-title">Every conversation begins with clarity.</h1>
+            <p>Manage your inquiry journey, contact-form fields, notification routing and preliminary business assessment.</p></div><span class="phase-label">V6 CONNECTOR INCLUDED · SMTP REQUIRES CONFIGURATION</span></div>
+          <div class="lead-stats" id="lead-stats" aria-live="polite">
+            <article class="stat-card"><span>Total inquiries</span><strong id="lead-total">—</strong><small>From active form endpoints</small></article>
+            <article class="stat-card"><span>New inquiries</span><strong id="lead-new">—</strong><small>Require your review</small></article>
+            <article class="stat-card"><span>Email notifications</span><strong id="lead-notified">—</strong><small>Confirmed SMTP deliveries</small></article>
+            <article class="stat-card"><span>Active forms</span><strong id="lead-forms-count">—</strong><small>Available through the CMS API</small></article>
+          </div>
+          <div class="lead-tabs" role="tablist" aria-label="Lead management">
+            <button type="button" data-lead-panel="inbox" class="active" role="tab" aria-selected="true">Inquiry inbox</button>
+            <button type="button" data-lead-panel="forms" role="tab" aria-selected="false">Form builder</button>
+            <button type="button" data-lead-panel="assessments" role="tab" aria-selected="false">Optimization assessment</button>
+            <button type="button" data-lead-panel="routing" role="tab" aria-selected="false">Email routing</button>
+          </div>
+          <div id="lead-inbox" class="lead-panel">
+            <section class="table-panel lead-inbox-shell">
+              <div class="table-head"><div><span class="eyebrow">STRATEGY INQUIRIES</span><h2>Inquiry inbox</h2><p class="muted">Only authorized administrators can access contact details.</p></div><div class="lead-filter"><input id="lead-search" type="search" placeholder="Search name, company or email" aria-label="Search inquiries"><select id="lead-status-filter" aria-label="Filter inquiry status"><option value="">All statuses</option><option value="new">New</option><option value="reviewed">Reviewed</option><option value="qualified">Qualified</option><option value="follow_up">Follow-up</option><option value="converted">Converted</option><option value="closed">Closed</option><option value="spam">Spam</option></select><button type="button" id="leads-csv" class="button secondary small">Export CSV</button></div></div>
+              <div class="table-scroll"><table class="lead-table"><thead><tr><th>CONTACT</th><th>COMPANY</th><th>PRIORITY</th><th>DATE (UTC)</th><th>EMAIL</th><th>STATUS</th><th>OPEN</th></tr></thead><tbody id="lead-inbox-body"></tbody></table></div><p class="empty-state" id="lead-inbox-empty">No inquiries yet. Submissions will appear after the public form is connected.</p>
+            </section>
+            <section id="lead-detail" class="table-panel lead-detail hidden" aria-labelledby="lead-detail-title">
+              <div class="section-heading"><div><span class="eyebrow">INQUIRY DETAIL</span><h2 id="lead-detail-title">—</h2><p id="lead-detail-meta" class="muted"></p></div><button id="lead-detail-close" type="button" class="button secondary small">Close</button></div>
+              <div class="lead-detail-grid"><div><div id="lead-answer-list" class="lead-answer-list"></div><div class="setting-gap"><h3>Internal notes</h3><div id="lead-notes" class="lead-notes"></div><form id="lead-note-form" class="editor-form"><label for="lead-note-text">Add a private note</label><textarea id="lead-note-text" rows="3" minlength="2" maxlength="5000" required></textarea><button class="button primary small" type="submit">Save note</button></form></div></div>
+              <div class="lead-detail-side"><label>Inquiry status<select id="lead-detail-status"><option value="new">New</option><option value="reviewed">Reviewed</option><option value="qualified">Qualified</option><option value="follow_up">Follow-up</option><option value="converted">Converted</option><option value="closed">Closed</option><option value="spam">Spam</option></select></label><label>Assigned owner<select id="lead-detail-assignee"><option value="">Unassigned</option></select></label><button type="button" id="lead-detail-save" class="button primary small">Save inquiry</button><div class="lead-mail-state"><span class="eyebrow">NOTIFICATION DELIVERY</span><strong id="lead-mail-status">—</strong><p class="helper">Email is marked delivered only after SMTP confirms acceptance.</p><button type="button" id="lead-retry-email" class="button secondary small">Retry notification</button></div></div></div>
+            </section>
+          </div>
+          <div id="lead-forms" class="lead-panel hidden">
+            <div class="studio-layout lead-editor-layout">
+              <section class="table-panel studio-list"><div class="table-head"><div><span class="eyebrow">FORM LIBRARY</span><h2>Editable forms</h2></div><button type="button" id="lead-new-form" class="button primary small">+ New form</button></div><div id="lead-form-list" class="page-record-list"></div></section>
+              <section class="table-panel editor-panel"><div class="editor-head"><div><span class="eyebrow">STRUCTURED FORM EDITOR</span><h2 id="lead-form-heading">Choose a form</h2><p>Field labels, validation, dropdown options, order and submission messages are editable.</p></div></div>
+                <div id="lead-form-empty" class="empty-editor">Select an existing form or create a new draft.</div>
+                <form id="lead-form-editor" class="editor-form hidden">
+                  <div class="field-grid"><label>Form title<input id="lead-form-title" maxlength="180" required></label><label>URL slug<input id="lead-form-slug" maxlength="100" required pattern="[a-z0-9-]+"></label></div>
+                  <label>Introductory description<textarea id="lead-form-intro" maxlength="1500" rows="2"></textarea></label><label>Success message<textarea id="lead-form-success" maxlength="500" rows="2" required></textarea></label><label class="check-label"><input type="checkbox" id="lead-form-active"> Activate public API for this form</label>
+                  <div class="section-heading"><div><span class="eyebrow">CONFIGURABLE FORM SCHEMA</span><h2>Fields and validation</h2></div><button id="lead-add-field" type="button" class="button secondary small">+ Add field</button></div><p class="helper">Add, edit or reorder your fields. Required indicators appear directly beside labels on the public form. The approved V6 contact form uses six initial fields plus a separate consent checkbox.</p><div id="lead-field-list" class="lead-field-list"></div>
+                  <div class="form-actions"><button class="button primary" type="submit" id="lead-save-form">Save form changes</button><button class="button secondary" type="button" id="lead-delete-form">Delete inactive form</button></div><p class="helper">These definitions drive API validation immediately. Phase 6 V6 staging integration is available; production export requires readiness approval.</p>
+                </form>
+              </section>
+            </div>
+          </div>
+          <div id="lead-assessments" class="lead-panel hidden">
+            <div class="studio-layout lead-editor-layout">
+              <section class="table-panel studio-list"><div class="table-head"><div><span class="eyebrow">ASSESSMENTS</span><h2>Business optimization</h2></div><button type="button" id="lead-new-assessment" class="button primary small">+ New</button></div><div id="lead-assessment-list" class="page-record-list"></div></section>
+              <section class="table-panel editor-panel"><div class="editor-head"><div><span class="eyebrow">PRELIMINARY ASSESSMENT EDITOR</span><h2 id="lead-assessment-heading">Choose an assessment</h2><p>Adjust questions, answer options and the areas to investigate. Never imply an automatic diagnosis.</p></div></div>
+                <div id="lead-assessment-empty" class="empty-editor">Select an assessment to manage its questions and result rules.</div>
+                <form id="lead-assessment-editor" class="editor-form hidden">
+                  <div class="field-grid"><label>Assessment name<input id="lead-assessment-title" maxlength="200" required></label><label>URL slug<input id="lead-assessment-slug" maxlength="100" required></label></div>
+                  <label>Introduction<textarea id="lead-assessment-intro" rows="3" maxlength="1500"></textarea></label><label>Limitations / disclaimer<textarea id="lead-assessment-disclaimer" rows="3" maxlength="600" required></textarea></label>
+                  <div class="field-grid"><label>CTA text<input id="lead-assessment-cta" maxlength="100"></label><label>CTA URL (internal path)<input id="lead-assessment-url" maxlength="300"></label></div>
+                  <label class="check-label"><input id="lead-assessment-active" type="checkbox"> Activate public assessment API</label>
+                  <div class="section-heading"><div><span class="eyebrow">QUESTIONS</span><h2>What should you ask?</h2></div><button type="button" id="lead-add-question" class="button secondary small">+ Add question</button></div><div id="lead-question-list" class="lead-question-list"></div>
+                  <div class="section-heading"><div><span class="eyebrow">PRELIMINARY GUIDANCE</span><h2>Result rules</h2></div></div><p class="helper">Select a question and choice, then specify an area for further investigation. These are guidance statements, not confirmed findings.</p><div class="lead-rule-builder"><label>Question<select id="lead-rule-question"></select></label><label>Selected answer<select id="lead-rule-option"></select></label><label>Suggested area<input id="lead-rule-title" maxlength="150"></label><label>Explanation<textarea id="lead-rule-description" rows="3" maxlength="600"></textarea></label><button type="button" id="lead-add-rule" class="button secondary small">Add / update rule</button></div><div id="lead-rule-list" class="lead-rule-list"></div>
+                  <div class="form-actions"><button type="submit" class="button primary">Save assessment</button></div>
+                </form>
+              </section>
+            </div>
+          </div>
+          <div id="lead-routing" class="lead-panel hidden">
+            <div class="lead-routing-grid">
+              <section class="table-panel editor-panel"><div class="panel-eyebrow">NOTIFICATION CONFIGURATION</div><h2>Where should inquiries go?</h2><p class="muted">Only administrators can change notification destinations. Form notifications use an SMTP sender verified with your email provider.</p>
+                <form id="lead-routing-form" class="editor-form"><label>Primary recipient <span class="required">*</span><input type="email" id="lead-recipient" autocomplete="off" required></label><label>CC recipients, comma-separated<input id="lead-cc" placeholder="optional@company.com"></label><label>Email subject prefix<input id="lead-subject" maxlength="100" required></label><label class="check-label"><input id="lead-autoreply" type="checkbox"> Send a brief acknowledgment to the visitor</label><button class="button primary" type="submit">Save email settings</button></form>
+              </section>
+              <section class="table-panel lead-routing-info"><span class="eyebrow">DELIVERY READINESS</span><h2 id="lead-email-ready">Checking…</h2><p id="lead-email-help" class="muted">—</p><div class="lead-route-example"><span class="eyebrow">DEFAULT RECIPIENT</span><strong>muaghauri@gmail.com</strong><p class="helper">The email address can be changed here without editing frontend source. SMTP secrets are set on the server, not through this page.</p></div><div class="lead-route-example"><span class="eyebrow">CURRENT INTEGRATION</span><p class="helper">The API is ready, but the V6 website's current contact endpoint is separate until the Phase 6 connector is installed. An inquiry is saved even when SMTP is not configured; admins can retry the notification after fixing delivery.</p></div></section>
+            </div>
+          </div>
+        </section>
+        <section id="view-publishing" class="view hidden" aria-labelledby="p5-title">
+          <div class="page-heading"><div><span class="eyebrow">PHASE 05 · EDITORIAL GOVERNANCE</span><h1 id="p5-title">Control what goes live.</h1><p>Improve search visibility, review editorial changes, preview privately and prepare immutable local staging releases.</p></div><span class="phase-label">STAGING ONLY · PUBLIC V6 CONNECTS IN PHASE 6</span></div>
+          <div class="p5-stats"><article class="stat-card"><span>SEO records checked</span><strong id="p5-total">—</strong><small>Pages and content collections</small></article><article class="stat-card"><span>Items with SEO issues</span><strong id="p5-errors">—</strong><small>Review before search indexing</small></article><article class="stat-card"><span>Awaiting approval</span><strong id="p5-pending">—</strong><small>Two-person review</small></article><article class="stat-card"><span>Current staging release</span><strong id="p5-current">—</strong><small>Immutable local site snapshot</small></article></div>
+          <div class="lead-tabs" role="tablist" aria-label="Publishing tools"><button type="button" class="active" data-p5-tab="seo" role="tab" aria-selected="true">SEO studio</button><button type="button" data-p5-tab="reviews" role="tab" aria-selected="false">Editorial approvals</button><button type="button" data-p5-tab="publish" role="tab" aria-selected="false">Preview &amp; releases</button><button type="button" data-p5-tab="redirects" role="tab" aria-selected="false">Redirects</button></div>
+          <section id="p5-seo" class="p5-pane"><div class="p5-two-column"><div class="table-panel"><span class="eyebrow">CONTENT LIBRARY</span><h2>Select content</h2><label>Search pages &amp; collections<input id="p5-search" type="search" placeholder="Search by title or route"></label><div id="p5-content-list" class="p5-content-list"></div></div><div class="table-panel"><span class="eyebrow">SEARCH APPEARANCE</span><h2 id="p5-selection">Select a page or collection</h2><p class="helper">Changes remain drafts until they pass approval. Search previews are indicative; actual snippets vary by search engine.</p><form id="p5-seo-form" class="editor-form hidden"><div class="p5-search-preview"><small id="p5-preview-url">auvorent.com</small><h3 id="p5-preview-title">SEO title preview</h3><p id="p5-preview-description">Meta description preview</p></div><label>SEO title <span class="required">*</span><input id="p5-seo-title" maxlength="180" required></label><label>Meta description <span class="required">*</span><textarea id="p5-meta-description" rows="3" maxlength="320" required></textarea></label><label>Canonical URL override<input id="p5-canonical" type="url" placeholder="Default: site canonical + page route"></label><div class="field-grid"><label class="check-label"><input type="checkbox" id="p5-index"> Request search indexing</label><label class="check-label"><input type="checkbox" id="p5-follow"> Follow page links</label></div><label>Open Graph title<input id="p5-og-title" maxlength="180"></label><label>Open Graph description<textarea id="p5-og-description" rows="2" maxlength="320"></textarea></label><div class="field-grid"><label>Structured-data type<select id="p5-schema"><option>WebPage</option><option>Article</option><option>Service</option><option>Organization</option><option>AboutPage</option><option>ContactPage</option><option>FAQPage</option></select></label><label>Breadcrumb title<input id="p5-breadcrumb" maxlength="180"></label></div><label>Social image (managed library)<select id="p5-og-image"><option value="">None</option></select></label><div class="form-actions"><button class="button primary" id="p5-save-seo" type="submit">Save SEO draft</button><button class="button secondary" id="p5-preview" type="button">Private preview ↗</button></div></form><div class="p5-issues" id="p5-issues" aria-live="polite"></div><div class="p5-versions"><h3>Content version history</h3><div id="p5-versions"></div></div></div></div></section>
+          <section id="p5-reviews" class="p5-pane hidden"><div class="p5-two-column"><div class="table-panel"><span class="eyebrow">DRAFT CONTENT</span><h2>Submit for review</h2><label>Content<select id="p5-review-target"></select></label><label>Notes for the reviewer<textarea id="p5-review-note" rows="4" maxlength="1000" placeholder="What changed and what should the reviewer check?"></textarea></label><button type="button" class="button primary" id="p5-submit-review">Request approval</button><p class="helper">A different authorized reviewer must approve this exact content version. Editing afterward automatically invalidates approval.</p></div><div class="table-panel"><div class="table-head"><div><span class="eyebrow">APPROVAL QUEUE</span><h2>Editorial decisions</h2></div><button type="button" class="button secondary small" id="p5-refresh-reviews">Refresh</button></div><div id="p5-review-list"></div></div></div></section>
+          <section id="p5-publish" class="p5-pane hidden"><div class="p5-two-column"><div class="table-panel"><span class="eyebrow">PRIVATE STAGING</span><h2>Publish approved changes</h2><p>Approved pages and content are assembled into an immutable, SEO-aware local staging release. An unsuccessful build leaves the previous release intact.</p><p class="p5-callout">Local staging is always <strong>noindex</strong>. This phase does not deploy to auvorent.com or connect the public V6 forms.</p><label>Optional UTC publishing date &amp; time<input type="datetime-local" id="p5-schedule"></label><div class="form-actions"><button class="button primary" type="button" id="p5-build">Build staging release</button><button class="button secondary" type="button" id="p5-view-staging">View current staging ↗</button><button class="button secondary" type="button" id="p5-run-due">Run due scheduled jobs</button></div><p class="helper">Scheduled builds require a running job runner. The Run Due button processes scheduled jobs manually in local development.</p><p id="p5-build-result" role="status" class="helper"></p></div><div class="table-panel"><span class="eyebrow">IMMUTABLE RELEASES</span><h2>Deployment history</h2><div id="p5-deployments"></div><p class="helper">Rollback changes the local staging pointer only. Published database content remains available for the next rebuild.</p></div></div></section>
+          <section id="p5-redirects" class="p5-pane hidden"><div class="p5-two-column"><div class="table-panel"><span class="eyebrow">LINK CONTINUITY</span><h2>Manage redirects</h2><form id="p5-redirect-form" class="editor-form"><label>Old path<input id="p5-redirect-old" placeholder="/old-service/" required></label><label>New local path<input id="p5-redirect-new" placeholder="/services/" required></label><div class="field-grid"><label>Type<select id="p5-redirect-status"><option value="301">301 — Permanent</option><option value="302">302 — Temporary</option></select></label><label>Internal note<input id="p5-redirect-note" maxlength="300"></label></div><button type="submit" class="button primary">Add redirect</button></form></div><div class="table-panel"><span class="eyebrow">ACTIVE RULES</span><h2>Redirect map</h2><div id="p5-redirects-list"></div></div></div></section>
+        </section>
+        <section id="view-users" class="view hidden" aria-labelledby="users-title">
+          <div class="page-heading"><div><span class="eyebrow">IDENTITY & ACCESS</span><h1 id="users-title">Manage your team.</h1><p>Invite authorized users and control permissions across the platform.</p></div><button class="button primary" id="add-user" type="button">+ Create account</button></div>
+          <section class="table-panel"><div class="table-head"><h2>CMS accounts</h2><label class="search-wrap"><span class="sr-only">Search users</span><input id="user-search" placeholder="Search by name or email" type="search"></label></div><div class="table-scroll"><table><thead><tr><th>NAME</th><th>EMAIL</th><th>ROLE</th><th>STATUS</th><th>MANAGE</th></tr></thead><tbody id="users-body"></tbody></table></div><p id="users-empty" class="empty-state hidden">No accounts match this search.</p></section>
+        </section>
+        <section id="view-audit" class="view hidden" aria-labelledby="audit-title">
+          <div class="page-heading"><div><span class="eyebrow">SECURITY & GOVERNANCE</span><h1 id="audit-title">A record of every action.</h1><p>Review authentication events, user changes and administrator activity.</p></div><button id="refresh-audit" class="button secondary" type="button">Refresh log</button></div>
+          <section class="table-panel"><div class="table-head"><h2>Recent audit events</h2><span class="subtle-label">LATEST 40</span></div><div class="table-scroll"><table><thead><tr><th>DATE (UTC)</th><th>EVENT</th><th>ACTOR</th><th>TARGET</th></tr></thead><tbody id="audit-body"></tbody></table></div><p class="helper">Only Super Admin users can view these records. Logs do not include passwords or session tokens.</p></section>
+        </section>
+        <section id="view-profile" class="view hidden" aria-labelledby="profile-title">
+          <div class="page-heading"><div><span class="eyebrow">ACCOUNT SECURITY</span><h1 id="profile-title">Your CMS account.</h1><p>Keep your administrator credentials protected.</p></div></div>
+          <div class="profile-grid"><section class="table-panel profile-card"><div class="panel-eyebrow">YOUR PROFILE</div><h2 id="profile-name">—</h2><p id="profile-email" class="muted">—</p><span id="profile-role" class="role-pill">—</span></section>
+            <section class="table-panel profile-card"><div class="panel-eyebrow">CHANGE PASSWORD</div><form id="password-form" class="stack"><label for="old-password">Current password</label><input id="old-password" type="password" autocomplete="current-password" required><label for="new-password">New password</label><input id="new-password" type="password" autocomplete="new-password" minlength="12" required><label for="confirm-password">Confirm new password</label><input id="confirm-password" type="password" autocomplete="new-password" minlength="12" required><button class="button primary" type="submit">Update password</button></form><p class="helper">At least 12 characters. Other sessions will be revoked.</p></section></div>
+        </section>
+      </main>
+      <footer class="app-footer">AUVORENT ADVISORY · CONTENT & LEAD STUDIO · PRIVATE WORKSPACE</footer>
+    </div>
+  </div>
+
+  <dialog id="user-dialog" class="modal" aria-labelledby="user-dialog-title"><form id="new-user-form" class="stack"><div class="modal-header"><div><span class="eyebrow">ACCESS MANAGEMENT</span><h2 id="user-dialog-title">Create CMS account</h2></div><button type="button" id="close-user-dialog" aria-label="Close" class="icon-button">✕</button></div>
+    <label for="new-user-name">Full name</label><input id="new-user-name" required minlength="2" maxlength="120">
+    <label for="new-user-email">Work email</label><input id="new-user-email" type="email" required>
+    <label for="new-user-role">Access role</label><select id="new-user-role"><option value="viewer">Viewer — read-only</option><option value="reviewer">Reviewer — approval</option><option value="editor">Editor — draft content</option><option value="admin">Admin — publishing</option><option value="super_admin">Super Admin — full access</option></select>
+    <label for="new-user-password">Initial password</label><input id="new-user-password" type="password" minlength="12" required autocomplete="new-password"><p class="helper">Share securely outside this CMS. The user must change it on first login.</p>
+    <button type="submit" class="button primary full">Create account</button>
+  </form></dialog>
+
+  <dialog id="page-dialog" class="modal" aria-labelledby="page-dialog-title"><form id="new-page-form" class="stack"><div class="modal-header"><div><span class="eyebrow">PAGE STUDIO</span><h2 id="page-dialog-title">Create page</h2></div><button type="button" data-close="page-dialog" aria-label="Close" class="icon-button">✕</button></div><label>Page title<input id="new-page-title" required minlength="2"></label><label>Route<input id="new-page-route" required placeholder="/new-page/"></label><label>Slug<input id="new-page-slug" required placeholder="new-page"></label><label>Template<input id="new-page-template" value="standard"></label><button class="button primary full" type="submit">Create draft page</button></form></dialog>
+  <dialog id="section-dialog" class="modal" aria-labelledby="section-dialog-title"><form id="section-form" class="stack"><div class="modal-header"><div><span class="eyebrow">MODULAR CONTENT</span><h2 id="section-dialog-title">Add section</h2></div><button type="button" data-close="section-dialog" aria-label="Close" class="icon-button">✕</button></div><label>Section key<input id="section-key" required placeholder="capabilities"></label><label>Section type<select id="section-type"><option value="hero">Hero</option><option value="rich_text">Rich text</option><option value="split_content">Split content</option><option value="cards">Cards</option><option value="cta">CTA banner</option><option value="process">Process</option><option value="faq">FAQ</option></select></label><label>Heading<input id="section-heading-input" placeholder="Section heading"></label><label>Description<textarea id="section-description" rows="4" placeholder="Section description"></textarea></label><button class="button primary full" type="submit">Add section</button></form></dialog>
+  <svg xmlns="http://www.w3.org/2000/svg" class="svg-defs" aria-hidden="true"><symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></symbol><symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5M3 16l9 5 9-5"/></symbol><symbol id="i-file" viewBox="0 0 24 24"><path d="M6 2h8l5 5v15H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z"/><path d="M14 2v6h5M8 13h8M8 17h8"/></symbol><symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8" cy="8" r="2"/><path d="m3 17 6-6 5 5 3-3 4 4"/></symbol><symbol id="i-inbox" viewBox="0 0 24 24"><path d="M4 4h16l2 12v4H2v-4L4 4Z"/><path d="M2 15h6l2 3h4l2-3h6"/></symbol><symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c-6 5-6 13 0 18M12 3c6 5 6 13 0 18"/></symbol><symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20v-3a6 6 0 0 1 12 0v3H3ZM16 5a3 3 0 0 1 0 6M17 15a5 5 0 0 1 4 5"/></symbol><symbol id="i-shield" viewBox="0 0 24 24"><path d="m12 2 8 3v7c0 5-3 8-8 10-5-2-8-5-8-10V5l8-3Z"/><path d="m8 12 3 3 5-6"/></symbol><symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="m9 3 1-2h4l1 2 2 1 2-1 3 4-2 2v6l2 2-3 4-2-1-2 1-1 2h-4l-1-2-2-1-2 1-3-4 2-2V9L2 7l3-4 2 1 2-1Z"/></symbol><symbol id="i-menu" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></symbol></svg>
+</body>
+</html>

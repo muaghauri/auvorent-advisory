@@ -1,0 +1,34 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+instance/*.sqlite
+instance/*.sqlite-*
+instance/media/*
+!instance/media/.gitkeep
+
+# Environment and credentials
+.env
+.env.*
+!.env.example
+
+# Local database and generated files
+instance/
+*.sqlite
+*.sqlite3
+*.db
+
+# Python
+.venv/
+.venv312/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Frontend
+node_modules/
+dist/
+
+# macOS
+.DS_Store

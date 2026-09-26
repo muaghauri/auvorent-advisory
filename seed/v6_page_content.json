@@ -1,0 +1,864 @@
+{
+  "schema_version": 1,
+  "source": "Auvorent Advisory V6 rendered site",
+  "pages": [
+    {
+      "route": "/",
+      "title": "Auvorent Advisory",
+      "seo_title": "Auvorent Advisory | Business Optimization & AI Strategy Consulting",
+      "meta_description": "Business optimization, operational diagnostics and practical AI strategy for business owners and executive teams. Find root causes, improve performance and make better decisions.",
+      "template": "standard",
+      "show_in_navigation": false,
+      "is_indexable": true,
+      "sections": [
+        {
+          "section_key": "turn-business-complexity-into-clearer-decisions",
+          "section_type": "hero",
+          "position": 0,
+          "is_enabled": true,
+          "content": {
+            "heading": "Turn business complexity into clearer decisions.",
+            "html": "<section class=\"hero executive-hero\"><div class=\"wrap hero-grid\"><div class=\"hero-copy\"><p class=\"eyebrow\">BUSINESS CLARITY / AI-ENABLED ADVISORY</p><h1>Turn business complexity into <em>clearer decisions.</em></h1><p class=\"hero-lead\">We work with business owners and executive teams to uncover what is slowing performance, identify the real constraint and build practical improvements — including AI where it earns its place.</p><div class=\"hero-actions\"><a class=\"btn btn-primary\" href=\"/contact/\">Book a strategy call <span aria-hidden=\"true\">↗</span></a><a class=\"btn btn-secondary\" href=\"/our-approach/\">Explore our approach <span aria-hidden=\"true\">↗</span></a></div><div class=\"hero-proofline\"><span>Diagnose the issue</span><span>Prioritize the opportunity</span><span>Measure the result</span></div></div><div class=\"hero-photo\"><img alt=\"Executive reviewing business performance\" height=\"960\" src=\"/assets/images/executive-hero.webp\" width=\"900\"/><div class=\"metric-card metric-a\"><small>REVENUE FORECAST</small><strong>Scenario view</strong><span>Planning horizon</span><svg aria-hidden=\"true\" viewbox=\"0 0 90 34\"><path d=\"M3 30 18 23 31 25 47 15 60 18 73 9 87 4\"></path></svg></div><div class=\"metric-card metric-b\"><small>OPERATING MODEL</small><strong>Constraint map</strong><span>Workflow signals</span><svg aria-hidden=\"true\" viewbox=\"0 0 90 34\"><path d=\"M4 27 18 26 30 20 44 23 58 13 71 15 87 6\"></path></svg></div><div class=\"metric-card metric-c\"><small>VALUE CREATION</small><strong>Opportunity lens</strong><span>Illustrative analysis</span><div aria-hidden=\"true\" class=\"mini-donut\"></div></div></div></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "section-2",
+          "section_type": "legacy_html",
+          "position": 1,
+          "is_enabled": true,
+          "content": {
+            "heading": "",
+            "html": "<section class=\"signal executive-signal\"><div class=\"wrap signal-inner\"><span>BUILT FOR LEADERS WHO NEED</span><div>Clarity on what is really happening</div><div>Confidence in what to change first</div><div>A partner who stays accountable</div></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "good-businesses-still-carry-hidden-friction",
+          "section_type": "legacy_html",
+          "position": 2,
+          "is_enabled": true,
+          "content": {
+            "heading": "Good businesses still carry hidden friction.",
+            "html": "<section class=\"section challenge-story\"><div class=\"wrap story-grid\"><div class=\"story-media\"><img alt=\"Business diagnostic discussion between an advisor and leadership team\" height=\"690\" src=\"/assets/images/diagnostic-session.webp\" width=\"1240\"/></div><div class=\"story-copy\"><p class=\"eyebrow\">THE BUSINESS OWNER’S CHALLENGE</p><h2>Good businesses still carry <em>hidden friction.</em></h2><p class=\"lead\">Margins tighten. Reporting gets slower. Teams work around systems instead of through them. Those are symptoms. The useful question is what is causing them.</p><div class=\"editorial-points\"><div><span>01</span><p><strong>Find the real constraint.</strong><br/>Separate root causes from the noise around them.</p></div><div><span>02</span><p><strong>Focus on the highest-value move.</strong><br/>Prioritize change by impact, feasibility and risk.</p></div><div><span>03</span><p><strong>Improve with evidence.</strong><br/>Measure before and after so progress is visible.</p></div></div><a class=\"inline-link\" href=\"/assessment/\">Identify where to look first ↗</a></div></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "from-diagnosis-to-measurable-progress",
+          "section_type": "legacy_html",
+          "position": 3,
+          "is_enabled": true,
+          "content": {
+            "heading": "From diagnosis to measurable progress.",
+            "html": "<section class=\"section section-tinted services-premium\"><div class=\"wrap\"><div class=\"section-head\"><p class=\"eyebrow\">OUR ADVISORY PRACTICE</p><h2>From diagnosis to measurable progress.</h2><p class=\"lead\">A connected set of advisory capabilities for leaders who want a clearer operating picture and practical execution support.</p></div><div class=\"services-grid\"><a class=\"service-card\" href=\"/services/business-diagnostics/\"><span class=\"service-index\">01 / ADVISORY</span><span aria-hidden=\"true\" class=\"service-icon\"><svg aria-hidden=\"true\" viewbox=\"0 0 48 48\"><circle cx=\"22\" cy=\"22\" r=\"11\"></circle><path d=\"M30.5 30.5 40 40M17 22h10M22 17v10\"></path></svg></span><h3>Business Diagnostics</h3><p>Uncover the root causes behind operational friction, unpredictable outcomes and constrained growth.</p><span class=\"card-link\">Explore capability <span aria-hidden=\"true\" class=\"arrow\">↗</span></span></a><a class=\"service-card\" href=\"/services/ai-strategy/\"><span class=\"service-index\">02 / ADVISORY</span><span aria-hidden=\"true\" class=\"service-icon\"><svg aria-hidden=\"true\" viewbox=\"0 0 48 48\"><rect height=\"24\" rx=\"4\" width=\"24\" x=\"12\" y=\"12\"></rect><path d=\"M19 19h10v10H19zM24 7v5M24 36v5M7 24h5M36 24h5M11 11l4 4M33 33l4 4M37 11l-4 4M15 33l-4 4\"></path></svg></span><h3>AI Strategy &amp; Implementation</h3><p>Translate business priorities into sensible automation and AI initiatives—not technology for its own sake.</p><span class=\"card-link\">Explore capability <span aria-hidden=\"true\" class=\"arrow\">↗</span></span></a><a class=\"service-card\" href=\"/services/predictive-intelligence/\"><span class=\"service-index\">03 / ADVISORY</span><span aria-hidden=\"true\" class=\"service-icon\"><svg aria-hidden=\"true\" viewbox=\"0 0 48 48\"><path d=\"M8 36h32M11 31l8-9 7 6 11-15\"></path><path d=\"M29 13h8v8\"></path></svg></span><h3>Predictive Intelligence</h3><p>Turn trustworthy operational data into sharper reporting, scenario planning and practical forward-looking insight.</p><span class=\"card-link\">Explore capability <span aria-hidden=\"true\" class=\"arrow\">↗</span></span></a><a class=\"service-card\" href=\"/services/continuous-optimization/\"><span class=\"service-index\">04 / ADVISORY</span><span aria-hidden=\"true\" class=\"service-icon\"><svg aria-hidden=\"true\" viewbox=\"0 0 48 48\"><path d=\"M12 17a14 14 0 0 1 23-4l3 4M36 31a14 14 0 0 1-23 4l-3-4\"></path><path d=\"M38 9v8h-8M10 39v-8h8\"></path><circle cx=\"24\" cy=\"24\" r=\"4\"></circle></svg></span><h3>Continuous Optimization</h3><p>Make business improvement a repeatable management discipline through structured reviews and ongoing advisory support.</p><span class=\"card-link\">Explore capability <span aria-hidden=\"true\" class=\"arrow\">↗</span></span></a></div></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "a-practical-route-from-uncertainty-to-action",
+          "section_type": "legacy_html",
+          "position": 4,
+          "is_enabled": true,
+          "content": {
+            "heading": "A practical route from uncertainty to action.",
+            "html": "<section class=\"section methodology dark-method\"><div class=\"wrap method-grid\"><div><p class=\"eyebrow\">HOW WE WORK</p><h2>A practical route from <em>uncertainty to action.</em></h2><p class=\"lead\">We start with the business, not the technology. The work is structured around decisions, operating realities and evidence that can stand up in a leadership discussion.</p><a class=\"btn btn-secondary\" href=\"/our-approach/\">See our methodology <span aria-hidden=\"true\">↗</span></a></div><div class=\"steps executive-steps\"><div><span>01</span><section><h3>Understand</h3><p>Align on the decision, the business objective and the pressure behind it.</p></section></div><div><span>02</span><section><h3>Diagnose</h3><p>Review workflows, data and stakeholder perspectives to find the underlying constraint.</p></section></div><div><span>03</span><section><h3>Design &amp; implement</h3><p>Build the simplest practical solution — AI included only when it creates real value.</p></section></div><div><span>04</span><section><h3>Measure &amp; refine</h3><p>Track the outcome, learn from what changed and keep improving where it matters.</p></section></div></div></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "know-what-changed-understand-why",
+          "section_type": "legacy_html",
+          "position": 5,
+          "is_enabled": true,
+          "content": {
+            "heading": "Know what changed. Understand why.",
+            "html": "<section class=\"section intelligence-section\"><div class=\"wrap intelligence-grid\"><div class=\"intelligence-panel\"><div class=\"panel-top\"><span>EXECUTIVE INTELLIGENCE / ILLUSTRATIVE</span><span>↗</span></div><div class=\"panel-title\">A clearer operating picture,<br/>without the noise.</div><div class=\"mini-metrics\"><div><small>01</small><strong>Process health</strong><span>Where work slows</span></div><div><small>02</small><strong>Scenario outlook</strong><span>What may change next</span></div></div><svg aria-label=\"Illustrative performance visualization\" role=\"img\" viewbox=\"0 0 480 160\"><defs><lineargradient id=\"sparkFill\" x1=\"0\" x2=\"0\" y1=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#78d6b2\" stop-opacity=\".3\"></stop><stop offset=\"1\" stop-color=\"#78d6b2\" stop-opacity=\"0\"></stop></lineargradient></defs><g opacity=\".55\" stroke=\"#567586\"><path d=\"M5 40H475 M5 80H475 M5 120H475\"></path></g><path d=\"M5 129 L65 119 L125 134 L185 90 L245 96 L305 61 L365 78 L425 32 L475 19 L475 145 L5 145Z\" fill=\"url(#sparkFill)\"></path><polyline fill=\"none\" points=\"5,129 65,119 125,134 185,90 245,96 305,61 365,78 425,32 475,19\" stroke=\"#8ce1be\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"3\"></polyline></svg><p>Illustrative analytical interface — not client results.</p></div><div><p class=\"eyebrow\">EXECUTIVE INTELLIGENCE</p><h2>Know what changed.<br/><em>Understand why.</em></h2><p class=\"lead\">Dashboards are only useful when they improve a decision. We help leadership teams define the right measures, understand the story behind them and build a review rhythm people can actually use.</p><a class=\"btn btn-secondary\" href=\"/services/predictive-intelligence/\">Explore predictive intelligence <span aria-hidden=\"true\">↗</span></a></div></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "built-around-operating-complexity-not-buzzwords",
+          "section_type": "legacy_html",
+          "position": 6,
+          "is_enabled": true,
+          "content": {
+            "heading": "Built around operating complexity, not buzzwords.",
+            "html": "<section class=\"section industries-preview\"><div class=\"wrap\"><div class=\"section-head\"><p class=\"eyebrow\">WHERE WE FOCUS</p><h2>Built around operating complexity, not buzzwords.</h2><p class=\"lead\">Our initial focus is on B2B service businesses where leadership visibility, delivery discipline and better use of data can materially improve performance.</p></div><div class=\"industry-grid\"><a class=\"industry-card\" href=\"/industries/business-professional-services/\"><span>01 / INDUSTRY</span><h3>Business &amp; professional services</h3><p>Improve delivery visibility, reduce rework and make service operations easier to manage.</p><span>Explore sector ↗</span></a><a class=\"industry-card dark\" href=\"/industries/staffing-recruitment/\"><span>02 / INDUSTRY</span><h3>Staffing &amp; recruitment operations</h3><p>Find bottlenecks across intake, candidate pipelines, handoffs and management reporting.</p><span>Explore sector ↗</span></a></div></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "where-is-your-business-losing-momentum",
+          "section_type": "legacy_html",
+          "position": 7,
+          "is_enabled": true,
+          "content": {
+            "heading": "Where is your business losing momentum?",
+            "html": "<section class=\"section assessment-banner\"><div class=\"wrap assessment-grid\"><div class=\"assessment-banner-copy\"><p class=\"eyebrow\">A PRACTICAL STARTING POINT</p><h2>Where is your business <em>losing momentum?</em></h2><p class=\"lead\">Take a brief Business Optimization Check to reflect on the processes, reporting and growth barriers that deserve closer attention.</p><a class=\"btn btn-primary\" href=\"/assessment/\">Start the optimization check <span aria-hidden=\"true\">↗</span></a></div><figure class=\"assessment-image\"><img alt=\"Illustrated advisory workspace with a laptop and a diagnose, prioritize, improve process graphic\" height=\"354\" loading=\"lazy\" src=\"/assets/images/assessment-workspace.webp\" width=\"886\"/><figcaption><span aria-hidden=\"true\" class=\"assessment-caption-icon\"><svg fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" viewbox=\"0 0 48 48\"><path d=\"M8 31 18 22l8 6 13-16\"></path><path d=\"M29 12h10v10\"></path><path d=\"M8 39h32\"></path></svg></span><span>A clearer starting point for your next decision<small>Understand the signals. Investigate the causes.</small></span></figcaption></figure></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "useful-thinking-for-the-decisions-ahead",
+          "section_type": "legacy_html",
+          "position": 8,
+          "is_enabled": true,
+          "content": {
+            "heading": "Useful thinking for the decisions ahead.",
+            "html": "<section class=\"section insights-preview\"><div class=\"wrap\"><div class=\"section-head\"><p class=\"eyebrow\">AUVORENT PERSPECTIVES</p><h2>Useful thinking for the decisions ahead.</h2></div><div class=\"insights-grid\"><a class=\"insight-card\" href=\"/insights/diagnose-before-you-automate/\"><span>ADVISORY INSIGHTS / 6 min read</span><h3>Why You Should Diagnose Before You Automate</h3><p>The practical case for identifying root causes before investing in AI and workflow automation.</p><b>Read perspective ↗</b></a><a class=\"insight-card\" href=\"/insights/measure-ai-return-on-investment/\"><span>ADVISORY INSIGHTS / 7 min read</span><h3>How to Measure ROI on an AI Initiative</h3><p>A business-owner framework for evaluating AI against cost, adoption, quality and measurable process outcomes.</p><b>Read perspective ↗</b></a><a class=\"insight-card\" href=\"/insights/business-forecasting-data-readiness/\"><span>ADVISORY INSIGHTS / 5 min read</span><h3>Is Your Business Ready for Predictive Analytics?</h3><p>Five practical checks before investing in forecasts, dashboards or automated decision support.</p><b>Read perspective ↗</b></a></div></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "a-useful-first-conversation-should-create-clarity",
+          "section_type": "cta",
+          "position": 9,
+          "is_enabled": true,
+          "content": {
+            "heading": "A useful first conversation should create clarity.",
+            "html": "<section class=\"cta-section\"><div class=\"wrap cta-inner\"><div><p class=\"eyebrow\">START WITH THE BUSINESS PROBLEM</p><h2>A useful first conversation should create clarity.</h2><p>Tell us what is happening in the business. We’ll help determine the right next step — diagnostic, advisory or something simpler.</p></div><a class=\"btn btn-primary\" href=\"/contact/\">Discuss your business <span aria-hidden=\"true\">↗</span></a></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        }
+      ]
+    },
+    {
+      "route": "/about/",
+      "title": "About Auvorent Advisory",
+      "seo_title": "About Auvorent Advisory | Auvorent Advisory",
+      "meta_description": "Learn how Auvorent approaches business optimization: diagnose the real issue, prioritize practical improvements and use AI where it creates measurable value.",
+      "template": "standard",
+      "show_in_navigation": true,
+      "is_indexable": true,
+      "sections": [
+        {
+          "section_key": "clear-thinking-for-important-business-decisions",
+          "section_type": "hero",
+          "position": 0,
+          "is_enabled": true,
+          "content": {
+            "heading": "Clear thinking for important business decisions.",
+            "html": "<section class=\"sub-hero sub-hero-split\"><div class=\"wrap sub-hero-grid\"><div><p class=\"eyebrow\">ABOUT AUVORENT</p><h1>Clear thinking for <em>important business decisions.</em></h1><p class=\"lead\">Auvorent is built around a straightforward idea: before changing systems, teams or technology, understand what is actually getting in the way.</p></div><div class=\"sub-hero-media\"><img alt=\"Executive advisory discussion\" height=\"690\" src=\"/assets/images/diagnostic-session.webp\" width=\"1240\"/><div class=\"image-note\"><span>OUR POINT OF VIEW</span><strong>Business value before technology.</strong></div></div></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "we-are-here-to-make-the-next-decision-easier-to-defend",
+          "section_type": "legacy_html",
+          "position": 1,
+          "is_enabled": true,
+          "content": {
+            "heading": "We are here to make the next decision easier to defend.",
+            "html": "<section class=\"section\"><div class=\"wrap detail-grid executive-about\"><div><p class=\"eyebrow\">OUR POSITION</p><h2>We are here to make the next decision easier to defend.</h2><p class=\"lead\">That means looking at the operation as it really works, not how the process map says it should work. We bring structure to the problem, challenge assumptions and help leadership move from scattered symptoms to a practical course of action.</p><p>AI can be part of that answer. So can better ownership, cleaner data, a simpler workflow or a clearer management rhythm. The recommendation should fit the problem — not the other way around.</p></div><div class=\"detail-box principle-box\"><h3>What clients should expect from us</h3><ul class=\"check-list\"><li>Direct, evidence-led conversations</li><li>Clear scope and decision ownership</li><li>Practical recommendations people can use</li><li>Technology only where it earns its place</li><li>Measurement after implementation</li></ul></div></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "professional-enough-for-the-boardroom-practical-enough-for-the-operating-floor",
+          "section_type": "legacy_html",
+          "position": 2,
+          "is_enabled": true,
+          "content": {
+            "heading": "Professional enough for the boardroom. Practical enough for the operating floor.",
+            "html": "<section class=\"section section-tinted\"><div class=\"wrap about-values\"><div><p class=\"eyebrow\">HOW WE BUILD TRUST</p><h2>Professional enough for the boardroom. Practical enough for the operating floor.</h2></div><div class=\"value-grid\"><div><span>01</span><h3>Clarity</h3><p>We make the problem and the trade-offs visible before asking you to commit to a solution.</p></div><div><span>02</span><h3>Accountability</h3><p>Recommendations come with ownership, measures and a realistic implementation path.</p></div><div><span>03</span><h3>Judgment</h3><p>We use AI selectively. Sometimes the strongest answer is a better process, not a newer tool.</p></div></div></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "bring-us-the-business-question",
+          "section_type": "cta",
+          "position": 3,
+          "is_enabled": true,
+          "content": {
+            "heading": "Bring us the business question.",
+            "html": "<section class=\"cta-section\"><div class=\"wrap cta-inner\"><div><p class=\"eyebrow\">LET’S TALK</p><h2>Bring us the business question.</h2><p>You do not need a finished brief. Start with what feels slow, unclear, expensive or harder to manage than it should be.</p></div><a class=\"btn btn-primary\" href=\"/contact/\">Discuss your business <span aria-hidden=\"true\">↗</span></a></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        }
+      ]
+    },
+    {
+      "route": "/assessment/",
+      "title": "Business Optimization Check",
+      "seo_title": "Business Optimization Check | Auvorent Advisory",
+      "meta_description": "Explore business challenges through a short, honest preliminary assessment; identify questions for a deeper operational diagnostic.",
+      "template": "standard",
+      "show_in_navigation": false,
+      "is_indexable": true,
+      "sections": [
+        {
+          "section_key": "find-your-next-question-worth-answering",
+          "section_type": "hero",
+          "position": 0,
+          "is_enabled": true,
+          "content": {
+            "heading": "Find your next question worth answering.",
+            "html": "<section class=\"sub-hero\"><div class=\"wrap\"><p class=\"eyebrow\">BUSINESS OPTIMIZATION CHECK</p><h1>Find your next<br/><em>question worth answering.</em></h1><p class=\"lead\">A brief, confidential self-reflection to highlight areas that may warrant a deeper review. This is not a formal diagnosis or AI-readiness certification.</p></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "clarity-begins-with-the-right-questions",
+          "section_type": "legacy_html",
+          "position": 1,
+          "is_enabled": true,
+          "content": {
+            "heading": "Clarity begins with the right questions.",
+            "html": "<section class=\"section\"><div class=\"wrap assessment-layout\"><div class=\"assessment-intro\"><h2>Clarity begins with the right questions.</h2><p>Answer seven practical questions about your operations, data and business priorities. Your responses stay in your browser unless you choose to include them in a consultation inquiry.</p><ul class=\"check-list\"><li>About 3 minutes</li><li>No account required</li><li>No invented numerical score</li><li>Actionable next-step suggestions</li></ul></div><div class=\"questionnaire\" id=\"assessment-form\"><div class=\"progress-caption\"><span id=\"assessment-step\">Question 1 of 7</span><span id=\"assessment-percent\">14%</span></div><div class=\"progress-track\"><div id=\"assessment-progress\" style=\"width:14%\"></div></div><div aria-live=\"polite\" id=\"assessment-question\"></div><div aria-live=\"polite\" hidden=\"\" id=\"assessment-results\"></div><div class=\"assessment-controls\"><button class=\"btn btn-secondary\" disabled=\"\" id=\"assessment-back\" type=\"button\">Back</button><button class=\"btn btn-primary\" disabled=\"\" id=\"assessment-next\" type=\"button\">Continue ↗</button></div></div></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "when-you-re-ready-for-the-next-level-of-clarity",
+          "section_type": "cta",
+          "position": 2,
+          "is_enabled": true,
+          "content": {
+            "heading": "When you’re ready for the next level of clarity.",
+            "html": "<section class=\"cta-section\"><div class=\"wrap cta-inner\"><div><p class=\"eyebrow\">A FORMAL DIAGNOSIS</p><h2>When you’re ready for the next level of clarity.</h2><p>A Business Performance Diagnostic examines real workflows, evidence and stakeholder perspectives before recommending solutions.</p></div><a class=\"btn btn-primary\" href=\"/contact/\">Discuss your business <span aria-hidden=\"true\">↗</span></a></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        }
+      ]
+    },
+    {
+      "route": "/contact/",
+      "title": "Contact Auvorent Advisory",
+      "seo_title": "Contact Auvorent Advisory | Auvorent Advisory",
+      "meta_description": "Book an initial strategy conversation about business diagnostics, operational optimization or practical AI adoption.",
+      "template": "standard",
+      "show_in_navigation": false,
+      "is_indexable": true,
+      "sections": [
+        {
+          "section_key": "tell-us-what-s-holding-growth-back",
+          "section_type": "hero",
+          "position": 0,
+          "is_enabled": true,
+          "content": {
+            "heading": "Tell us what’s holding growth back.",
+            "html": "<section class=\"sub-hero\"><div class=\"wrap\"><p class=\"eyebrow\">CONTACT / STRATEGY CALL</p><h1>Tell us what’s<br/><em>holding growth back.</em></h1><p class=\"lead\">A structured conversation about your operating challenges, priorities and what a sensible first engagement could look like.</p></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "start-with-a-conversation-not-a-sales-pitch",
+          "section_type": "legacy_html",
+          "position": 1,
+          "is_enabled": true,
+          "content": {
+            "heading": "Start with a conversation, not a sales pitch.",
+            "html": "<section class=\"section\"><div class=\"wrap contact-layout\"><div class=\"contact-explainer\"><h2>Start with a conversation, not a sales pitch.</h2><p class=\"lead\">Explain where your business needs greater clarity. We’ll review your inquiry and propose an appropriate discovery discussion.</p><div class=\"contact-info\"><div><span>01</span><strong>Tell us what’s happening</strong><p>Share the business problem, desired outcome and urgency.</p></div><div><span>02</span><strong>Discuss your priorities</strong><p>Explore the current workflow, evidence and constraints.</p></div><div><span>03</span><strong>Agree on a suitable next step</strong><p>A diagnostic proposal where the problem and fit are clear.</p></div></div></div><form class=\"contact-form\" id=\"contact-form\" novalidate=\"\"><h2>Request a strategy conversation</h2><p>We use this information only to respond to your business inquiry. Avoid including sensitive client or employee data.</p><p class=\"required-hint\"><span aria-hidden=\"true\">*</span> Required fields</p><div class=\"form-pair\"><label><span class=\"field-caption\">Full name <sup aria-hidden=\"true\" class=\"required-marker\">*</sup></span><input autocomplete=\"name\" maxlength=\"100\" minlength=\"2\" name=\"name\" placeholder=\"Your name\" required=\"\"/></label><label><span class=\"field-caption\">Work email <sup aria-hidden=\"true\" class=\"required-marker\">*</sup></span><input autocomplete=\"email\" maxlength=\"180\" name=\"email\" placeholder=\"you@company.com\" required=\"\" type=\"email\"/></label></div><div class=\"form-pair\"><label><span class=\"field-caption\">Company <sup aria-hidden=\"true\" class=\"required-marker\">*</sup></span><input autocomplete=\"organization\" maxlength=\"120\" name=\"company\" placeholder=\"Company name\" required=\"\"/></label><label><span class=\"field-caption\">Team size <sup aria-hidden=\"true\" class=\"required-marker\">*</sup></span><select name=\"size\" required=\"\"><option value=\"\">Select a range</option><option>1–14</option><option>15–49</option><option>50–149</option><option>150–499</option><option>500+</option></select></label></div><label><span class=\"field-caption\">What is your main priority? <sup aria-hidden=\"true\" class=\"required-marker\">*</sup></span><select name=\"priority\" required=\"\"><option value=\"\">Choose one</option><option>Operational inefficiency</option><option>Margins and delivery performance</option><option>Data and forecasting</option><option>AI opportunity assessment</option><option>Growth and strategic planning</option><option>Other</option></select></label><label><span class=\"field-caption\">Tell us about the challenge <sup aria-hidden=\"true\" class=\"required-marker\">*</sup></span><textarea maxlength=\"3000\" minlength=\"20\" name=\"message\" placeholder=\"What is happening, and what would meaningful improvement look like?\" required=\"\" rows=\"5\"></textarea></label><div aria-hidden=\"true\" class=\"hp\"><label>Leave this field empty<input autocomplete=\"off\" name=\"website\" tabindex=\"-1\" type=\"text\"/></label></div><label class=\"consent\"><input name=\"consent\" required=\"\" type=\"checkbox\"/><span>I agree to be contacted about this inquiry. See our <a href=\"/privacy/\" rel=\"noopener\" target=\"_blank\">privacy information</a>.</span></label><div aria-live=\"polite\" class=\"form-status\" id=\"contact-status\" role=\"status\"></div><button class=\"btn btn-primary submit\" type=\"submit\">Send inquiry ↗</button><p class=\"small-disclaimer\">The form requires the contact service to be configured before it can deliver inquiries.</p></form></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        }
+      ]
+    },
+    {
+      "route": "/industries/",
+      "title": "Industries We Serve",
+      "seo_title": "Industries We Serve | Auvorent Advisory",
+      "meta_description": "Auvorent works with U.S. B2B professional services, agencies, staffing and recruitment operations on business diagnostics and AI-enabled improvement.",
+      "template": "standard",
+      "show_in_navigation": true,
+      "is_indexable": true,
+      "sections": [
+        {
+          "section_key": "industry-knowledge-business-specific-solutions",
+          "section_type": "hero",
+          "position": 0,
+          "is_enabled": true,
+          "content": {
+            "heading": "Industry knowledge. Business-specific solutions.",
+            "html": "<section class=\"sub-hero\"><div class=\"wrap\"><p class=\"eyebrow\">SECTORS</p><h1>Industry knowledge.<br/><em>Business-specific solutions.</em></h1><p class=\"lead\">Our initial focus is on U.S. business-to-business service firms, with engagement scope determined by operating complexity and team capability.</p></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "business-professional-services",
+          "section_type": "legacy_html",
+          "position": 1,
+          "is_enabled": true,
+          "content": {
+            "heading": "Business & Professional Services",
+            "html": "<section class=\"section\"><div class=\"wrap industry-grid\"><a class=\"industry-card\" href=\"/industries/business-professional-services/\"><span>FOCUS AREA</span><h3>Business &amp; Professional Services</h3><p>For consulting firms, agencies, managed service providers and other B2B businesses managing people, projects and client delivery.</p><span>Explore sector ↗</span></a><a class=\"industry-card\" href=\"/industries/staffing-recruitment/\"><span>FOCUS AREA</span><h3>Staffing &amp; Recruitment Operations</h3><p>For staffing and recruitment businesses balancing candidate pipelines, client demand, compliance workflows and repeatable service delivery.</p><span>Explore sector ↗</span></a></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "the-operating-problem-matters-more-than-the-label",
+          "section_type": "cta",
+          "position": 2,
+          "is_enabled": true,
+          "content": {
+            "heading": "The operating problem matters more than the label.",
+            "html": "<section class=\"cta-section\"><div class=\"wrap cta-inner\"><div><p class=\"eyebrow\">DON’T SEE YOUR SECTOR?</p><h2>The operating problem matters more than the label.</h2><p>If your organization shares these workflow or reporting challenges, we can determine whether our advisory approach fits.</p></div><a class=\"btn btn-primary\" href=\"/contact/\">Discuss your business <span aria-hidden=\"true\">↗</span></a></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        }
+      ]
+    },
+    {
+      "route": "/industries/business-professional-services/",
+      "title": "Business & Professional Services AI & Business Consulting",
+      "seo_title": "Business & Professional Services AI & Business Consulting | Auvorent Advisory",
+      "meta_description": "For consulting firms, agencies, managed service providers and other B2B businesses managing people, projects and client delivery.",
+      "template": "standard",
+      "show_in_navigation": false,
+      "is_indexable": true,
+      "sections": [
+        {
+          "section_key": "business-professional-services",
+          "section_type": "hero",
+          "position": 0,
+          "is_enabled": true,
+          "content": {
+            "heading": "Business & Professional Services .",
+            "html": "<section class=\"sub-hero\"><div class=\"wrap\"><p class=\"eyebrow\">FOCUSED INDUSTRY ADVISORY</p><h1>Business &amp; Professional Services<span class=\"period\">.</span></h1><p class=\"lead\">For consulting firms, agencies, managed service providers and other B2B businesses managing people, projects and client delivery.</p><a class=\"btn btn-primary\" href=\"/contact/\">Discuss your operations <span aria-hidden=\"true\">↗</span></a></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "where-performance-gets-constrained",
+          "section_type": "legacy_html",
+          "position": 1,
+          "is_enabled": true,
+          "content": {
+            "heading": "Where performance gets constrained.",
+            "html": "<section class=\"section\"><div class=\"wrap detail-grid\"><div><p class=\"eyebrow\">COMMON PRESSURES</p><h2>Where performance gets constrained.</h2><ul class=\"editorial-list\"><li>Unpredictable delivery margins</li><li>Manual reporting across disconnected systems</li><li>Low visibility into resource capacity</li><li>Lengthy proposal-to-onboarding handoffs</li></ul></div><div class=\"detail-box\"><p class=\"eyebrow\">POSSIBLE INTERVENTIONS</p><h3>How we may help</h3><ul class=\"check-list\"><li>Work intake and handoff redesign</li><li>Capacity and utilization visibility</li><li>Client reporting automation</li><li>Project and service profitability analysis</li></ul><p class=\"small-disclaimer\">Approaches are illustrative; recommendations require actual diagnostic evidence.</p></div></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "find-the-constraint-behind-the-symptom",
+          "section_type": "cta",
+          "position": 2,
+          "is_enabled": true,
+          "content": {
+            "heading": "Find the constraint behind the symptom.",
+            "html": "<section class=\"cta-section\"><div class=\"wrap cta-inner\"><div><p class=\"eyebrow\">START WITH A CLEAR PICTURE</p><h2>Find the constraint behind the symptom.</h2><p>A structured diagnostic can identify where changes are most likely to improve business outcomes.</p></div><a class=\"btn btn-primary\" href=\"/contact/\">Discuss your business <span aria-hidden=\"true\">↗</span></a></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        }
+      ]
+    },
+    {
+      "route": "/industries/staffing-recruitment/",
+      "title": "Staffing & Recruitment Operations AI & Business Consulting",
+      "seo_title": "Staffing & Recruitment Operations AI & Business Consulting | Auvorent Advisory",
+      "meta_description": "For staffing and recruitment businesses balancing candidate pipelines, client demand, compliance workflows and repeatable service delivery.",
+      "template": "standard",
+      "show_in_navigation": false,
+      "is_indexable": true,
+      "sections": [
+        {
+          "section_key": "staffing-recruitment-operations",
+          "section_type": "hero",
+          "position": 0,
+          "is_enabled": true,
+          "content": {
+            "heading": "Staffing & Recruitment Operations .",
+            "html": "<section class=\"sub-hero\"><div class=\"wrap\"><p class=\"eyebrow\">FOCUSED INDUSTRY ADVISORY</p><h1>Staffing &amp; Recruitment Operations<span class=\"period\">.</span></h1><p class=\"lead\">For staffing and recruitment businesses balancing candidate pipelines, client demand, compliance workflows and repeatable service delivery.</p><a class=\"btn btn-primary\" href=\"/contact/\">Discuss your operations <span aria-hidden=\"true\">↗</span></a></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "where-performance-gets-constrained",
+          "section_type": "legacy_html",
+          "position": 1,
+          "is_enabled": true,
+          "content": {
+            "heading": "Where performance gets constrained.",
+            "html": "<section class=\"section\"><div class=\"wrap detail-grid\"><div><p class=\"eyebrow\">COMMON PRESSURES</p><h2>Where performance gets constrained.</h2><ul class=\"editorial-list\"><li>Manual candidate and client follow-ups</li><li>Limited forecast visibility across the pipeline</li><li>Time-consuming handovers and data entry</li><li>Inconsistent reporting on placement conversion</li></ul></div><div class=\"detail-box\"><p class=\"eyebrow\">POSSIBLE INTERVENTIONS</p><h3>How we may help</h3><ul class=\"check-list\"><li>Pipeline and handoff diagnostics</li><li>Operational reporting and source-of-delay analysis</li><li>Responsible screening-workflow support</li><li>Demand, capacity and placement forecasting where data supports it</li></ul><p class=\"small-disclaimer\">Approaches are illustrative; recommendations require actual diagnostic evidence.</p></div></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "find-the-constraint-behind-the-symptom",
+          "section_type": "cta",
+          "position": 2,
+          "is_enabled": true,
+          "content": {
+            "heading": "Find the constraint behind the symptom.",
+            "html": "<section class=\"cta-section\"><div class=\"wrap cta-inner\"><div><p class=\"eyebrow\">START WITH A CLEAR PICTURE</p><h2>Find the constraint behind the symptom.</h2><p>A structured diagnostic can identify where changes are most likely to improve business outcomes.</p></div><a class=\"btn btn-primary\" href=\"/contact/\">Discuss your business <span aria-hidden=\"true\">↗</span></a></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        }
+      ]
+    },
+    {
+      "route": "/insights/",
+      "title": "Insights on Business Optimization & AI",
+      "seo_title": "Insights on Business Optimization & AI | Auvorent Advisory",
+      "meta_description": "Practical insights on diagnostics, automation ROI, forecasting and AI implementation for business owners and executives.",
+      "template": "standard",
+      "show_in_navigation": true,
+      "is_indexable": true,
+      "sections": [
+        {
+          "section_key": "better-questions-sharper-decisions",
+          "section_type": "hero",
+          "position": 0,
+          "is_enabled": true,
+          "content": {
+            "heading": "Better questions. Sharper decisions.",
+            "html": "<section class=\"sub-hero\"><div class=\"wrap\"><p class=\"eyebrow\">INSIGHTS</p><h1>Better questions.<br/><em>Sharper decisions.</em></h1><p class=\"lead\">Practical perspectives on operational diagnosis, AI economics and forecasting readiness for ambitious business leaders.</p></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "why-you-should-diagnose-before-you-automate",
+          "section_type": "legacy_html",
+          "position": 1,
+          "is_enabled": true,
+          "content": {
+            "heading": "Why You Should Diagnose Before You Automate",
+            "html": "<section class=\"section\"><div class=\"wrap insights-grid\"><a class=\"insight-card\" href=\"/insights/diagnose-before-you-automate/\"><span>ADVISORY INSIGHTS · 6 min read</span><h2>Why You Should Diagnose Before You Automate</h2><p>The practical case for identifying root causes before investing in AI and workflow automation.</p><b>Read article ↗</b></a><a class=\"insight-card\" href=\"/insights/measure-ai-return-on-investment/\"><span>ADVISORY INSIGHTS · 7 min read</span><h2>How to Measure ROI on an AI Initiative</h2><p>A business-owner framework for evaluating AI against cost, adoption, quality and measurable process outcomes.</p><b>Read article ↗</b></a><a class=\"insight-card\" href=\"/insights/business-forecasting-data-readiness/\"><span>ADVISORY INSIGHTS · 5 min read</span><h2>Is Your Business Ready for Predictive Analytics?</h2><p>Five practical checks before investing in forecasts, dashboards or automated decision support.</p><b>Read article ↗</b></a></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        }
+      ]
+    },
+    {
+      "route": "/insights/business-forecasting-data-readiness/",
+      "title": "Is Your Business Ready for Predictive Analytics?",
+      "seo_title": "Is Your Business Ready for Predictive Analytics? | Auvorent Advisory",
+      "meta_description": "Five practical checks before investing in forecasts, dashboards or automated decision support.",
+      "template": "article",
+      "show_in_navigation": false,
+      "is_indexable": true,
+      "sections": [
+        {
+          "section_key": "is-your-business-ready-for-predictive-analytics",
+          "section_type": "article",
+          "position": 0,
+          "is_enabled": true,
+          "content": {
+            "heading": "Is Your Business Ready for Predictive Analytics? .",
+            "html": "<article><section class=\"sub-hero article-hero\"><div class=\"wrap\"><p class=\"eyebrow\">AUVORENT INSIGHTS / 5 min read</p><h1>Is Your Business Ready for Predictive Analytics?<span class=\"period\">.</span></h1><p class=\"lead\">Five practical checks before investing in forecasts, dashboards or automated decision support.</p><div class=\"article-meta\">Auvorent Advisory editorial · 2026-09-24 · 5 min read</div></div></section><div class=\"wrap article-layout\"><div class=\"article-body\"><h2>1. Confirm the decision you want to improve</h2><p>Forecasting should guide a real choice: hiring plans, staffing coverage, inventory, budget allocation or lead-generation capacity. Specify the decision horizon and how often managers will use the forecast.</p><h2>2. Audit your data coverage</h2><p>Check whether historical records are complete, consistently defined and granular enough. A model cannot reliably compensate for months of missing data, incompatible categories or inconsistent timestamps.</p><h2>3. Understand what drives the outcome</h2><p>Document business factors that may influence the target metric, such as seasonality, capacity limits, pricing, marketing activity, economic conditions and one-time disruptions. These may matter as much as the forecasting method.</p><h2>4. Compare against a simple baseline</h2><p>Begin with a transparent baseline, such as last-period performance or a seasonal average. Evaluate more sophisticated methods only when they produce better decisions, not merely more impressive charts.</p><h2>5. Design a management process around uncertainty</h2><p>Present ranges, assumptions and scenario sensitivities. Assign ownership for forecast review and create a process for responding when actual outcomes differ from expectations. Predictions support judgment; they do not remove uncertainty.</p><div class=\"article-next\"><a class=\"btn btn-primary\" href=\"/contact/\">Discuss your business <span aria-hidden=\"true\">↗</span></a><a class=\"btn btn-secondary\" href=\"/insights/\">All insights <span aria-hidden=\"true\">↗</span></a></div></div><aside class=\"article-aside\"><span>THINK CLEARER</span><p>Real business improvement starts with a better understanding of the problem.</p><a href=\"/assessment/\">Take our optimization check ↗</a></aside></div></article>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        }
+      ]
+    },
+    {
+      "route": "/insights/diagnose-before-you-automate/",
+      "title": "Why You Should Diagnose Before You Automate",
+      "seo_title": "Why You Should Diagnose Before You Automate | Auvorent Advisory",
+      "meta_description": "The practical case for identifying root causes before investing in AI and workflow automation.",
+      "template": "article",
+      "show_in_navigation": false,
+      "is_indexable": true,
+      "sections": [
+        {
+          "section_key": "why-you-should-diagnose-before-you-automate",
+          "section_type": "article",
+          "position": 0,
+          "is_enabled": true,
+          "content": {
+            "heading": "Why You Should Diagnose Before You Automate .",
+            "html": "<article><section class=\"sub-hero article-hero\"><div class=\"wrap\"><p class=\"eyebrow\">AUVORENT INSIGHTS / 6 min read</p><h1>Why You Should Diagnose Before You Automate<span class=\"period\">.</span></h1><p class=\"lead\">The practical case for identifying root causes before investing in AI and workflow automation.</p><div class=\"article-meta\">Auvorent Advisory editorial · 2026-09-24 · 6 min read</div></div></section><div class=\"wrap article-layout\"><div class=\"article-body\"><h2>Automation amplifies the process you already have</h2><p>A slow workflow is not necessarily an automation problem. Delays may originate in unclear responsibilities, inaccurate intake information, conflicting approval rules or incentives that encourage rework. Adding an AI assistant before locating the real cause can make those problems harder to see rather than easier to resolve.</p><h2>Start with the decision and the business outcome</h2><p>Choose one measurable outcome: fewer handoff delays, faster time to response, lower rework or improved contribution margin. Trace the workflow backwards from that outcome. Interview the people performing the work, examine actual records and compare the expected process with what happens in practice.</p><h2>Separate symptoms from causes</h2><p>A long customer response time is a symptom. Its cause could be insufficient staffing at predictable peaks, fragmented communication, approval bottlenecks or an ineffective prioritization policy. Each cause points to a different intervention, and only some require AI.</p><h2>Choose the least complex viable intervention</h2><p>Eliminate unnecessary steps first. Standardize inputs and make ownership clear. Introduce deterministic automation for repetitive rules. Consider AI where language, document variability or prediction creates a strong enough business case to justify monitoring, review and operating costs.</p><h2>Measure before calling it a success</h2><p>Establish a baseline and a review period before implementation. Track time saved, error rates, customer outcomes and the full cost of operating the new process. Productivity improvements are useful, but they should be connected to service quality, capacity or financial outcomes.</p><div class=\"article-next\"><a class=\"btn btn-primary\" href=\"/contact/\">Discuss your business <span aria-hidden=\"true\">↗</span></a><a class=\"btn btn-secondary\" href=\"/insights/\">All insights <span aria-hidden=\"true\">↗</span></a></div></div><aside class=\"article-aside\"><span>THINK CLEARER</span><p>Real business improvement starts with a better understanding of the problem.</p><a href=\"/assessment/\">Take our optimization check ↗</a></aside></div></article>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        }
+      ]
+    },
+    {
+      "route": "/insights/measure-ai-return-on-investment/",
+      "title": "How to Measure ROI on an AI Initiative",
+      "seo_title": "How to Measure ROI on an AI Initiative | Auvorent Advisory",
+      "meta_description": "A business-owner framework for evaluating AI against cost, adoption, quality and measurable process outcomes.",
+      "template": "article",
+      "show_in_navigation": false,
+      "is_indexable": true,
+      "sections": [
+        {
+          "section_key": "how-to-measure-roi-on-an-ai-initiative",
+          "section_type": "article",
+          "position": 0,
+          "is_enabled": true,
+          "content": {
+            "heading": "How to Measure ROI on an AI Initiative .",
+            "html": "<article><section class=\"sub-hero article-hero\"><div class=\"wrap\"><p class=\"eyebrow\">AUVORENT INSIGHTS / 7 min read</p><h1>How to Measure ROI on an AI Initiative<span class=\"period\">.</span></h1><p class=\"lead\">A business-owner framework for evaluating AI against cost, adoption, quality and measurable process outcomes.</p><div class=\"article-meta\">Auvorent Advisory editorial · 2026-09-24 · 7 min read</div></div></section><div class=\"wrap article-layout\"><div class=\"article-body\"><h2>Begin with a business case, not a product demo</h2><p>Define the business process, the problem, the people affected and the decision that an AI initiative should improve. Without an outcome, a successful demonstration can still turn into an expensive workflow.</p><h2>Establish your baseline</h2><p>Record throughput, turnaround time, rework, conversion, quality and operating costs before deployment. Use a sufficiently representative period and note seasonal effects. If the baseline is unreliable, improve measurement before projecting savings.</p><h2>Calculate total cost of ownership</h2><p>Include subscriptions or model usage, integration, setup, human review, security controls, training and ongoing maintenance. Account for the time employees need to learn the redesigned process. Avoid presenting gross time savings as cash savings unless they actually change spending or generate additional output.</p><h2>Pilot with a defined decision gate</h2><p>Run a constrained pilot with success thresholds and a rollback plan. Compare the pilot with the baseline and monitor error rates and exceptions. Human oversight is especially important where incorrect outputs could affect customers, finances or private information.</p><h2>Review adoption and business impact together</h2><p>A tool can perform well in isolation and still fail to create value if the workflow is not adopted. Pair system usage and quality metrics with business KPIs, review results with process owners and keep optimizing after the initial launch.</p><div class=\"article-next\"><a class=\"btn btn-primary\" href=\"/contact/\">Discuss your business <span aria-hidden=\"true\">↗</span></a><a class=\"btn btn-secondary\" href=\"/insights/\">All insights <span aria-hidden=\"true\">↗</span></a></div></div><aside class=\"article-aside\"><span>THINK CLEARER</span><p>Real business improvement starts with a better understanding of the problem.</p><a href=\"/assessment/\">Take our optimization check ↗</a></aside></div></article>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        }
+      ]
+    },
+    {
+      "route": "/our-approach/",
+      "title": "Our Business Optimization Approach",
+      "seo_title": "Our Business Optimization Approach | Auvorent Advisory",
+      "meta_description": "Discover, diagnose, design, implement and optimize with evidence-led business consulting and measured AI adoption.",
+      "template": "standard",
+      "show_in_navigation": true,
+      "is_indexable": true,
+      "sections": [
+        {
+          "section_key": "clarity-before-technology-accountability-after-delivery",
+          "section_type": "hero",
+          "position": 0,
+          "is_enabled": true,
+          "content": {
+            "heading": "Clarity before technology. Accountability after delivery.",
+            "html": "<section class=\"sub-hero\"><div class=\"wrap\"><p class=\"eyebrow\">OUR METHOD</p><h1>Clarity before technology.<br/><em>Accountability after delivery.</em></h1><p class=\"lead\">A staged advisory process that moves from evidence and diagnosis to carefully selected change and measurable review.</p></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "discover",
+          "section_type": "legacy_html",
+          "position": 1,
+          "is_enabled": true,
+          "content": {
+            "heading": "Discover",
+            "html": "<section class=\"section\"><div class=\"wrap process-grid\"><div class=\"process-stage\"><span class=\"process-number\">01</span><div><h2>Discover</h2><p>Clarify the strategic and operational decisions the organization needs to improve.</p><ul class=\"check-list\"><li>Leadership alignment and decision-maker interviews</li><li>Problem definition and success criteria</li><li>Data access and operational readiness review</li></ul></div></div><div class=\"process-stage\"><span class=\"process-number\">02</span><div><h2>Diagnose</h2><p>Investigate the current operating model rather than taking surface-level symptoms at face value.</p><ul class=\"check-list\"><li>Process mapping and friction-point analysis</li><li>Evidence review, baselines and root-cause hypotheses</li><li>Opportunity and risk prioritization</li></ul></div></div><div class=\"process-stage\"><span class=\"process-number\">03</span><div><h2>Design</h2><p>Define the simplest responsible improvement plan, with AI considered only where suitable.</p><ul class=\"check-list\"><li>Target-state workflow and ownership design</li><li>Build-versus-buy and feasibility considerations</li><li>90-day roadmap and indicative business case</li></ul></div></div><div class=\"process-stage\"><span class=\"process-number\">04</span><div><h2>Implement</h2><p>Execute approved changes in controlled stages after technical and commercial scoping.</p><ul class=\"check-list\"><li>Pilot design, integration and staff enablement</li><li>Quality and security controls where relevant</li><li>Operational handover and adoption support</li></ul></div></div><div class=\"process-stage\"><span class=\"process-number\">05</span><div><h2>Optimize</h2><p>Review the outcome against baseline and update the plan as new information emerges.</p><ul class=\"check-list\"><li>Performance review and exception management</li><li>Continuous improvement backlog</li><li>Ongoing advisory accountability</li></ul></div></div></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "get-a-clearer-view-of-your-business",
+          "section_type": "cta",
+          "position": 2,
+          "is_enabled": true,
+          "content": {
+            "heading": "Get a clearer view of your business.",
+            "html": "<section class=\"cta-section\"><div class=\"wrap cta-inner\"><div><p class=\"eyebrow\">YOUR STARTING POINT</p><h2>Get a clearer view of your business.</h2><p>Our Business Performance Diagnostic is designed to make priorities explicit before a broader implementation commitment.</p></div><a class=\"btn btn-primary\" href=\"/contact/\">Discuss your business <span aria-hidden=\"true\">↗</span></a></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        }
+      ]
+    },
+    {
+      "route": "/privacy/",
+      "title": "Privacy Information — Draft",
+      "seo_title": "Privacy Information — Draft | Auvorent Advisory",
+      "meta_description": "Draft privacy information, subject to legal review before public launch.",
+      "template": "legal",
+      "show_in_navigation": false,
+      "is_indexable": false,
+      "sections": [
+        {
+          "section_key": "privacy-information",
+          "section_type": "hero",
+          "position": 0,
+          "is_enabled": true,
+          "content": {
+            "heading": "Privacy information.",
+            "html": "<section class=\"sub-hero\"><div class=\"wrap\"><p class=\"eyebrow\">DRAFT / LEGAL REVIEW REQUIRED</p><h1>Privacy information.</h1><p class=\"lead\">This page is a drafting placeholder and must be replaced with a legally reviewed privacy policy before public launch.</p></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "planned-information-handling",
+          "section_type": "legacy_html",
+          "position": 1,
+          "is_enabled": true,
+          "content": {
+            "heading": "Planned information handling",
+            "html": "<section class=\"section\"><div class=\"wrap narrow\"><h2>Planned information handling</h2><p>Contact inquiries will request a name, work email, company, size, priority and business challenge. Once the contact endpoint is configured, submissions will be delivered to a designated company inbox via the chosen transactional email provider. This page must be updated to identify the actual controller, provider, storage period, security practices and applicable rights for the final operating jurisdictions.</p><p>Do not submit confidential, regulated or sensitive data until the final privacy policy and security controls are in place.</p><a class=\"inline-link\" href=\"/contact/\">Return to contact ↗</a></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        }
+      ]
+    },
+    {
+      "route": "/services/",
+      "title": "Business Advisory Services",
+      "seo_title": "Business Advisory Services | Auvorent Advisory",
+      "meta_description": "Explore diagnostics, AI strategy, predictive intelligence and continuous optimization for growing service businesses.",
+      "template": "standard",
+      "show_in_navigation": true,
+      "is_indexable": true,
+      "sections": [
+        {
+          "section_key": "business-first-advisory-intelligent-execution",
+          "section_type": "hero",
+          "position": 0,
+          "is_enabled": true,
+          "content": {
+            "heading": "Business-first advisory. Intelligent execution.",
+            "html": "<section class=\"sub-hero\"><div class=\"wrap\"><p class=\"eyebrow\">OUR SERVICES</p><h1>Business-first advisory.<br/><em>Intelligent execution.</em></h1><p class=\"lead\">Explore four connected capabilities, each designed to address a specific business problem and contribute to lasting improvement.</p></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "business-diagnostics",
+          "section_type": "legacy_html",
+          "position": 1,
+          "is_enabled": true,
+          "content": {
+            "heading": "Business Diagnostics",
+            "html": "<section class=\"section\"><div class=\"wrap services-grid\"><a class=\"service-card\" href=\"/services/business-diagnostics/\"><span class=\"service-index\">01 / ADVISORY</span><span aria-hidden=\"true\" class=\"service-icon\"><svg aria-hidden=\"true\" viewbox=\"0 0 48 48\"><circle cx=\"22\" cy=\"22\" r=\"11\"></circle><path d=\"M30.5 30.5 40 40M17 22h10M22 17v10\"></path></svg></span><h3>Business Diagnostics</h3><p>Uncover the root causes behind operational friction, unpredictable outcomes and constrained growth.</p><span class=\"card-link\">Explore capability <span aria-hidden=\"true\" class=\"arrow\">↗</span></span></a><a class=\"service-card\" href=\"/services/ai-strategy/\"><span class=\"service-index\">02 / ADVISORY</span><span aria-hidden=\"true\" class=\"service-icon\"><svg aria-hidden=\"true\" viewbox=\"0 0 48 48\"><rect height=\"24\" rx=\"4\" width=\"24\" x=\"12\" y=\"12\"></rect><path d=\"M19 19h10v10H19zM24 7v5M24 36v5M7 24h5M36 24h5M11 11l4 4M33 33l4 4M37 11l-4 4M15 33l-4 4\"></path></svg></span><h3>AI Strategy &amp; Implementation</h3><p>Translate business priorities into sensible automation and AI initiatives—not technology for its own sake.</p><span class=\"card-link\">Explore capability <span aria-hidden=\"true\" class=\"arrow\">↗</span></span></a><a class=\"service-card\" href=\"/services/predictive-intelligence/\"><span class=\"service-index\">03 / ADVISORY</span><span aria-hidden=\"true\" class=\"service-icon\"><svg aria-hidden=\"true\" viewbox=\"0 0 48 48\"><path d=\"M8 36h32M11 31l8-9 7 6 11-15\"></path><path d=\"M29 13h8v8\"></path></svg></span><h3>Predictive Intelligence</h3><p>Turn trustworthy operational data into sharper reporting, scenario planning and practical forward-looking insight.</p><span class=\"card-link\">Explore capability <span aria-hidden=\"true\" class=\"arrow\">↗</span></span></a><a class=\"service-card\" href=\"/services/continuous-optimization/\"><span class=\"service-index\">04 / ADVISORY</span><span aria-hidden=\"true\" class=\"service-icon\"><svg aria-hidden=\"true\" viewbox=\"0 0 48 48\"><path d=\"M12 17a14 14 0 0 1 23-4l3 4M36 31a14 14 0 0 1-23 4l-3-4\"></path><path d=\"M38 9v8h-8M10 39v-8h8\"></path><circle cx=\"24\" cy=\"24\" r=\"4\"></circle></svg></span><h3>Continuous Optimization</h3><p>Make business improvement a repeatable management discipline through structured reviews and ongoing advisory support.</p><span class=\"card-link\">Explore capability <span aria-hidden=\"true\" class=\"arrow\">↗</span></span></a></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "not-sure-where-to-begin",
+          "section_type": "cta",
+          "position": 2,
+          "is_enabled": true,
+          "content": {
+            "heading": "Not sure where to begin?",
+            "html": "<section class=\"cta-section\"><div class=\"wrap cta-inner\"><div><p class=\"eyebrow\">A CLEAR START</p><h2>Not sure where to begin?</h2><p>A structured diagnostic helps establish priorities before committing to a larger transformation.</p></div><a class=\"btn btn-primary\" href=\"/contact/\">Discuss your business <span aria-hidden=\"true\">↗</span></a></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        }
+      ]
+    },
+    {
+      "route": "/services/ai-strategy/",
+      "title": "AI Strategy & Implementation Consulting",
+      "seo_title": "AI Strategy & Implementation Consulting | Auvorent Advisory",
+      "meta_description": "Translate business priorities into sensible automation and AI initiatives—not technology for its own sake.",
+      "template": "standard",
+      "show_in_navigation": false,
+      "is_indexable": true,
+      "sections": [
+        {
+          "section_key": "ai-strategy-implementation",
+          "section_type": "hero",
+          "position": 0,
+          "is_enabled": true,
+          "content": {
+            "heading": "AI Strategy & Implementation .",
+            "html": "<section class=\"sub-hero\"><div class=\"wrap\"><p class=\"eyebrow\">SERVICE / 02</p><h1>AI Strategy &amp; Implementation<span class=\"period\">.</span></h1><p class=\"lead\">Translate business priorities into sensible automation and AI initiatives—not technology for its own sake.</p><a class=\"btn btn-primary\" href=\"/contact/\">Discuss this capability <span aria-hidden=\"true\">↗</span></a></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "invest-in-the-right-workflow-improvements-with-clear-ownership-and-measurable-ta",
+          "section_type": "legacy_html",
+          "position": 1,
+          "is_enabled": true,
+          "content": {
+            "heading": "Invest in the right workflow improvements, with clear ownership and measurable targets.",
+            "html": "<section class=\"section\"><div class=\"wrap detail-grid\"><div><p class=\"eyebrow\">WHY IT MATTERS</p><h2>Invest in the right workflow improvements, with clear ownership and measurable targets.</h2><p class=\"lead\">We start with your business objectives and current operating realities. The right engagement is defined by the decisions it will improve—not the number of technologies it introduces.</p></div><div class=\"detail-box\"><h3>Typical engagement scope</h3><ul class=\"check-list\"><li>AI opportunity and feasibility assessment</li><li>Workflow redesign before automation</li><li>Vendor and build-versus-buy recommendations</li><li>Pilot design, rollout and adoption planning</li></ul><p class=\"small-disclaimer\">Final deliverables depend on discovery, data access and verified delivery capacity.</p></div></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "an-integrated-route-to-stronger-performance",
+          "section_type": "legacy_html",
+          "position": 2,
+          "is_enabled": true,
+          "content": {
+            "heading": "An integrated route to stronger performance.",
+            "html": "<section class=\"section section-tinted\"><div class=\"wrap\"><div class=\"section-head\"><p class=\"eyebrow\">CONNECTED CAPABILITIES</p><h2>An integrated route to stronger performance.</h2></div><div class=\"services-grid\"><a class=\"service-card\" href=\"/services/business-diagnostics/\"><span class=\"service-index\">01 / ADVISORY</span><span aria-hidden=\"true\" class=\"service-icon\"><svg aria-hidden=\"true\" viewbox=\"0 0 48 48\"><circle cx=\"22\" cy=\"22\" r=\"11\"></circle><path d=\"M30.5 30.5 40 40M17 22h10M22 17v10\"></path></svg></span><h3>Business Diagnostics</h3><p>Uncover the root causes behind operational friction, unpredictable outcomes and constrained growth.</p><span class=\"card-link\">Explore capability <span aria-hidden=\"true\" class=\"arrow\">↗</span></span></a><a class=\"service-card\" href=\"/services/predictive-intelligence/\"><span class=\"service-index\">03 / ADVISORY</span><span aria-hidden=\"true\" class=\"service-icon\"><svg aria-hidden=\"true\" viewbox=\"0 0 48 48\"><path d=\"M8 36h32M11 31l8-9 7 6 11-15\"></path><path d=\"M29 13h8v8\"></path></svg></span><h3>Predictive Intelligence</h3><p>Turn trustworthy operational data into sharper reporting, scenario planning and practical forward-looking insight.</p><span class=\"card-link\">Explore capability <span aria-hidden=\"true\" class=\"arrow\">↗</span></span></a><a class=\"service-card\" href=\"/services/continuous-optimization/\"><span class=\"service-index\">04 / ADVISORY</span><span aria-hidden=\"true\" class=\"service-icon\"><svg aria-hidden=\"true\" viewbox=\"0 0 48 48\"><path d=\"M12 17a14 14 0 0 1 23-4l3 4M36 31a14 14 0 0 1-23 4l-3-4\"></path><path d=\"M38 9v8h-8M10 39v-8h8\"></path><circle cx=\"24\" cy=\"24\" r=\"4\"></circle></svg></span><h3>Continuous Optimization</h3><p>Make business improvement a repeatable management discipline through structured reviews and ongoing advisory support.</p><span class=\"card-link\">Explore capability <span aria-hidden=\"true\" class=\"arrow\">↗</span></span></a></div></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "start-with-the-business-problem",
+          "section_type": "cta",
+          "position": 3,
+          "is_enabled": true,
+          "content": {
+            "heading": "Start with the business problem.",
+            "html": "<section class=\"cta-section\"><div class=\"wrap cta-inner\"><div><p class=\"eyebrow\">LET’S DISCUSS YOUR PRIORITIES</p><h2>Start with the business problem.</h2><p>We will help determine the appropriate diagnostic, advisory or implementation approach based on your objectives and readiness.</p></div><a class=\"btn btn-primary\" href=\"/contact/\">Discuss your business <span aria-hidden=\"true\">↗</span></a></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        }
+      ]
+    },
+    {
+      "route": "/services/business-diagnostics/",
+      "title": "Business Diagnostics Consulting",
+      "seo_title": "Business Diagnostics Consulting | Auvorent Advisory",
+      "meta_description": "Uncover the root causes behind operational friction, unpredictable outcomes and constrained growth.",
+      "template": "standard",
+      "show_in_navigation": false,
+      "is_indexable": true,
+      "sections": [
+        {
+          "section_key": "business-diagnostics",
+          "section_type": "hero",
+          "position": 0,
+          "is_enabled": true,
+          "content": {
+            "heading": "Business Diagnostics .",
+            "html": "<section class=\"sub-hero\"><div class=\"wrap\"><p class=\"eyebrow\">SERVICE / 01</p><h1>Business Diagnostics<span class=\"period\">.</span></h1><p class=\"lead\">Uncover the root causes behind operational friction, unpredictable outcomes and constrained growth.</p><a class=\"btn btn-primary\" href=\"/contact/\">Discuss this capability <span aria-hidden=\"true\">↗</span></a></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "understand-what-is-happening-why-it-happens-and-what-to-change-first",
+          "section_type": "legacy_html",
+          "position": 1,
+          "is_enabled": true,
+          "content": {
+            "heading": "Understand what is happening, why it happens and what to change first.",
+            "html": "<section class=\"section\"><div class=\"wrap detail-grid\"><div><p class=\"eyebrow\">WHY IT MATTERS</p><h2>Understand what is happening, why it happens and what to change first.</h2><p class=\"lead\">We start with your business objectives and current operating realities. The right engagement is defined by the decisions it will improve—not the number of technologies it introduces.</p></div><div class=\"detail-box\"><h3>Typical engagement scope</h3><ul class=\"check-list\"><li>Current-state process mapping and operational interviews</li><li>KPI baselines and problem definition</li><li>Root cause analysis and opportunity prioritization</li><li>90-day improvement roadmap</li></ul><p class=\"small-disclaimer\">Final deliverables depend on discovery, data access and verified delivery capacity.</p></div></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "an-integrated-route-to-stronger-performance",
+          "section_type": "legacy_html",
+          "position": 2,
+          "is_enabled": true,
+          "content": {
+            "heading": "An integrated route to stronger performance.",
+            "html": "<section class=\"section section-tinted\"><div class=\"wrap\"><div class=\"section-head\"><p class=\"eyebrow\">CONNECTED CAPABILITIES</p><h2>An integrated route to stronger performance.</h2></div><div class=\"services-grid\"><a class=\"service-card\" href=\"/services/ai-strategy/\"><span class=\"service-index\">02 / ADVISORY</span><span aria-hidden=\"true\" class=\"service-icon\"><svg aria-hidden=\"true\" viewbox=\"0 0 48 48\"><rect height=\"24\" rx=\"4\" width=\"24\" x=\"12\" y=\"12\"></rect><path d=\"M19 19h10v10H19zM24 7v5M24 36v5M7 24h5M36 24h5M11 11l4 4M33 33l4 4M37 11l-4 4M15 33l-4 4\"></path></svg></span><h3>AI Strategy &amp; Implementation</h3><p>Translate business priorities into sensible automation and AI initiatives—not technology for its own sake.</p><span class=\"card-link\">Explore capability <span aria-hidden=\"true\" class=\"arrow\">↗</span></span></a><a class=\"service-card\" href=\"/services/predictive-intelligence/\"><span class=\"service-index\">03 / ADVISORY</span><span aria-hidden=\"true\" class=\"service-icon\"><svg aria-hidden=\"true\" viewbox=\"0 0 48 48\"><path d=\"M8 36h32M11 31l8-9 7 6 11-15\"></path><path d=\"M29 13h8v8\"></path></svg></span><h3>Predictive Intelligence</h3><p>Turn trustworthy operational data into sharper reporting, scenario planning and practical forward-looking insight.</p><span class=\"card-link\">Explore capability <span aria-hidden=\"true\" class=\"arrow\">↗</span></span></a><a class=\"service-card\" href=\"/services/continuous-optimization/\"><span class=\"service-index\">04 / ADVISORY</span><span aria-hidden=\"true\" class=\"service-icon\"><svg aria-hidden=\"true\" viewbox=\"0 0 48 48\"><path d=\"M12 17a14 14 0 0 1 23-4l3 4M36 31a14 14 0 0 1-23 4l-3-4\"></path><path d=\"M38 9v8h-8M10 39v-8h8\"></path><circle cx=\"24\" cy=\"24\" r=\"4\"></circle></svg></span><h3>Continuous Optimization</h3><p>Make business improvement a repeatable management discipline through structured reviews and ongoing advisory support.</p><span class=\"card-link\">Explore capability <span aria-hidden=\"true\" class=\"arrow\">↗</span></span></a></div></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "start-with-the-business-problem",
+          "section_type": "cta",
+          "position": 3,
+          "is_enabled": true,
+          "content": {
+            "heading": "Start with the business problem.",
+            "html": "<section class=\"cta-section\"><div class=\"wrap cta-inner\"><div><p class=\"eyebrow\">LET’S DISCUSS YOUR PRIORITIES</p><h2>Start with the business problem.</h2><p>We will help determine the appropriate diagnostic, advisory or implementation approach based on your objectives and readiness.</p></div><a class=\"btn btn-primary\" href=\"/contact/\">Discuss your business <span aria-hidden=\"true\">↗</span></a></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        }
+      ]
+    },
+    {
+      "route": "/services/continuous-optimization/",
+      "title": "Continuous Optimization Consulting",
+      "seo_title": "Continuous Optimization Consulting | Auvorent Advisory",
+      "meta_description": "Make business improvement a repeatable management discipline through structured reviews and ongoing advisory support.",
+      "template": "standard",
+      "show_in_navigation": false,
+      "is_indexable": true,
+      "sections": [
+        {
+          "section_key": "continuous-optimization",
+          "section_type": "hero",
+          "position": 0,
+          "is_enabled": true,
+          "content": {
+            "heading": "Continuous Optimization .",
+            "html": "<section class=\"sub-hero\"><div class=\"wrap\"><p class=\"eyebrow\">SERVICE / 04</p><h1>Continuous Optimization<span class=\"period\">.</span></h1><p class=\"lead\">Make business improvement a repeatable management discipline through structured reviews and ongoing advisory support.</p><a class=\"btn btn-primary\" href=\"/contact/\">Discuss this capability <span aria-hidden=\"true\">↗</span></a></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "maintain-momentum-after-delivery-and-adapt-as-business-conditions-evolve",
+          "section_type": "legacy_html",
+          "position": 1,
+          "is_enabled": true,
+          "content": {
+            "heading": "Maintain momentum after delivery and adapt as business conditions evolve.",
+            "html": "<section class=\"section\"><div class=\"wrap detail-grid\"><div><p class=\"eyebrow\">WHY IT MATTERS</p><h2>Maintain momentum after delivery and adapt as business conditions evolve.</h2><p class=\"lead\">We start with your business objectives and current operating realities. The right engagement is defined by the decisions it will improve—not the number of technologies it introduces.</p></div><div class=\"detail-box\"><h3>Typical engagement scope</h3><ul class=\"check-list\"><li>Performance review and ownership rhythm</li><li>Bottleneck monitoring and corrective action</li><li>Team enablement and process improvement</li><li>Periodic strategy and priority reviews</li></ul><p class=\"small-disclaimer\">Final deliverables depend on discovery, data access and verified delivery capacity.</p></div></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "an-integrated-route-to-stronger-performance",
+          "section_type": "legacy_html",
+          "position": 2,
+          "is_enabled": true,
+          "content": {
+            "heading": "An integrated route to stronger performance.",
+            "html": "<section class=\"section section-tinted\"><div class=\"wrap\"><div class=\"section-head\"><p class=\"eyebrow\">CONNECTED CAPABILITIES</p><h2>An integrated route to stronger performance.</h2></div><div class=\"services-grid\"><a class=\"service-card\" href=\"/services/business-diagnostics/\"><span class=\"service-index\">01 / ADVISORY</span><span aria-hidden=\"true\" class=\"service-icon\"><svg aria-hidden=\"true\" viewbox=\"0 0 48 48\"><circle cx=\"22\" cy=\"22\" r=\"11\"></circle><path d=\"M30.5 30.5 40 40M17 22h10M22 17v10\"></path></svg></span><h3>Business Diagnostics</h3><p>Uncover the root causes behind operational friction, unpredictable outcomes and constrained growth.</p><span class=\"card-link\">Explore capability <span aria-hidden=\"true\" class=\"arrow\">↗</span></span></a><a class=\"service-card\" href=\"/services/ai-strategy/\"><span class=\"service-index\">02 / ADVISORY</span><span aria-hidden=\"true\" class=\"service-icon\"><svg aria-hidden=\"true\" viewbox=\"0 0 48 48\"><rect height=\"24\" rx=\"4\" width=\"24\" x=\"12\" y=\"12\"></rect><path d=\"M19 19h10v10H19zM24 7v5M24 36v5M7 24h5M36 24h5M11 11l4 4M33 33l4 4M37 11l-4 4M15 33l-4 4\"></path></svg></span><h3>AI Strategy &amp; Implementation</h3><p>Translate business priorities into sensible automation and AI initiatives—not technology for its own sake.</p><span class=\"card-link\">Explore capability <span aria-hidden=\"true\" class=\"arrow\">↗</span></span></a><a class=\"service-card\" href=\"/services/predictive-intelligence/\"><span class=\"service-index\">03 / ADVISORY</span><span aria-hidden=\"true\" class=\"service-icon\"><svg aria-hidden=\"true\" viewbox=\"0 0 48 48\"><path d=\"M8 36h32M11 31l8-9 7 6 11-15\"></path><path d=\"M29 13h8v8\"></path></svg></span><h3>Predictive Intelligence</h3><p>Turn trustworthy operational data into sharper reporting, scenario planning and practical forward-looking insight.</p><span class=\"card-link\">Explore capability <span aria-hidden=\"true\" class=\"arrow\">↗</span></span></a></div></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "start-with-the-business-problem",
+          "section_type": "cta",
+          "position": 3,
+          "is_enabled": true,
+          "content": {
+            "heading": "Start with the business problem.",
+            "html": "<section class=\"cta-section\"><div class=\"wrap cta-inner\"><div><p class=\"eyebrow\">LET’S DISCUSS YOUR PRIORITIES</p><h2>Start with the business problem.</h2><p>We will help determine the appropriate diagnostic, advisory or implementation approach based on your objectives and readiness.</p></div><a class=\"btn btn-primary\" href=\"/contact/\">Discuss your business <span aria-hidden=\"true\">↗</span></a></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        }
+      ]
+    },
+    {
+      "route": "/services/predictive-intelligence/",
+      "title": "Predictive Intelligence Consulting",
+      "seo_title": "Predictive Intelligence Consulting | Auvorent Advisory",
+      "meta_description": "Turn trustworthy operational data into sharper reporting, scenario planning and practical forward-looking insight.",
+      "template": "standard",
+      "show_in_navigation": false,
+      "is_indexable": true,
+      "sections": [
+        {
+          "section_key": "predictive-intelligence",
+          "section_type": "hero",
+          "position": 0,
+          "is_enabled": true,
+          "content": {
+            "heading": "Predictive Intelligence .",
+            "html": "<section class=\"sub-hero\"><div class=\"wrap\"><p class=\"eyebrow\">SERVICE / 03</p><h1>Predictive Intelligence<span class=\"period\">.</span></h1><p class=\"lead\">Turn trustworthy operational data into sharper reporting, scenario planning and practical forward-looking insight.</p><a class=\"btn btn-primary\" href=\"/contact/\">Discuss this capability <span aria-hidden=\"true\">↗</span></a></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "improve-decision-visibility-while-recognizing-forecast-uncertainty-and-data-limi",
+          "section_type": "legacy_html",
+          "position": 1,
+          "is_enabled": true,
+          "content": {
+            "heading": "Improve decision visibility while recognizing forecast uncertainty and data limitations.",
+            "html": "<section class=\"section\"><div class=\"wrap detail-grid\"><div><p class=\"eyebrow\">WHY IT MATTERS</p><h2>Improve decision visibility while recognizing forecast uncertainty and data limitations.</h2><p class=\"lead\">We start with your business objectives and current operating realities. The right engagement is defined by the decisions it will improve—not the number of technologies it introduces.</p></div><div class=\"detail-box\"><h3>Typical engagement scope</h3><ul class=\"check-list\"><li>Data quality and reporting readiness</li><li>Executive dashboard and metric design</li><li>Scenario analysis and demand forecasting</li><li>Decision-making cadences and early warning signals</li></ul><p class=\"small-disclaimer\">Final deliverables depend on discovery, data access and verified delivery capacity.</p></div></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "an-integrated-route-to-stronger-performance",
+          "section_type": "legacy_html",
+          "position": 2,
+          "is_enabled": true,
+          "content": {
+            "heading": "An integrated route to stronger performance.",
+            "html": "<section class=\"section section-tinted\"><div class=\"wrap\"><div class=\"section-head\"><p class=\"eyebrow\">CONNECTED CAPABILITIES</p><h2>An integrated route to stronger performance.</h2></div><div class=\"services-grid\"><a class=\"service-card\" href=\"/services/business-diagnostics/\"><span class=\"service-index\">01 / ADVISORY</span><span aria-hidden=\"true\" class=\"service-icon\"><svg aria-hidden=\"true\" viewbox=\"0 0 48 48\"><circle cx=\"22\" cy=\"22\" r=\"11\"></circle><path d=\"M30.5 30.5 40 40M17 22h10M22 17v10\"></path></svg></span><h3>Business Diagnostics</h3><p>Uncover the root causes behind operational friction, unpredictable outcomes and constrained growth.</p><span class=\"card-link\">Explore capability <span aria-hidden=\"true\" class=\"arrow\">↗</span></span></a><a class=\"service-card\" href=\"/services/ai-strategy/\"><span class=\"service-index\">02 / ADVISORY</span><span aria-hidden=\"true\" class=\"service-icon\"><svg aria-hidden=\"true\" viewbox=\"0 0 48 48\"><rect height=\"24\" rx=\"4\" width=\"24\" x=\"12\" y=\"12\"></rect><path d=\"M19 19h10v10H19zM24 7v5M24 36v5M7 24h5M36 24h5M11 11l4 4M33 33l4 4M37 11l-4 4M15 33l-4 4\"></path></svg></span><h3>AI Strategy &amp; Implementation</h3><p>Translate business priorities into sensible automation and AI initiatives—not technology for its own sake.</p><span class=\"card-link\">Explore capability <span aria-hidden=\"true\" class=\"arrow\">↗</span></span></a><a class=\"service-card\" href=\"/services/continuous-optimization/\"><span class=\"service-index\">04 / ADVISORY</span><span aria-hidden=\"true\" class=\"service-icon\"><svg aria-hidden=\"true\" viewbox=\"0 0 48 48\"><path d=\"M12 17a14 14 0 0 1 23-4l3 4M36 31a14 14 0 0 1-23 4l-3-4\"></path><path d=\"M38 9v8h-8M10 39v-8h8\"></path><circle cx=\"24\" cy=\"24\" r=\"4\"></circle></svg></span><h3>Continuous Optimization</h3><p>Make business improvement a repeatable management discipline through structured reviews and ongoing advisory support.</p><span class=\"card-link\">Explore capability <span aria-hidden=\"true\" class=\"arrow\">↗</span></span></a></div></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "start-with-the-business-problem",
+          "section_type": "cta",
+          "position": 3,
+          "is_enabled": true,
+          "content": {
+            "heading": "Start with the business problem.",
+            "html": "<section class=\"cta-section\"><div class=\"wrap cta-inner\"><div><p class=\"eyebrow\">LET’S DISCUSS YOUR PRIORITIES</p><h2>Start with the business problem.</h2><p>We will help determine the appropriate diagnostic, advisory or implementation approach based on your objectives and readiness.</p></div><a class=\"btn btn-primary\" href=\"/contact/\">Discuss your business <span aria-hidden=\"true\">↗</span></a></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        }
+      ]
+    },
+    {
+      "route": "/terms/",
+      "title": "Website Terms — Draft",
+      "seo_title": "Website Terms — Draft | Auvorent Advisory",
+      "meta_description": "Draft website terms, subject to legal review before public launch.",
+      "template": "legal",
+      "show_in_navigation": false,
+      "is_indexable": false,
+      "sections": [
+        {
+          "section_key": "website-terms",
+          "section_type": "hero",
+          "position": 0,
+          "is_enabled": true,
+          "content": {
+            "heading": "Website terms.",
+            "html": "<section class=\"sub-hero\"><div class=\"wrap\"><p class=\"eyebrow\">DRAFT / LEGAL REVIEW REQUIRED</p><h1>Website terms.</h1><p class=\"lead\">This page is a drafting placeholder and must be replaced with approved website terms before public launch.</p></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        },
+        {
+          "section_key": "section-2",
+          "section_type": "legacy_html",
+          "position": 1,
+          "is_enabled": true,
+          "content": {
+            "heading": "",
+            "html": "<section class=\"section\"><div class=\"wrap narrow\"><p>Website content is general information, not a promise of outcome or an engagement agreement. Formal consulting services will be governed by separately agreed statements of work and commercial terms.</p><p>Have legal counsel finalize jurisdiction, liability, intellectual property and privacy provisions before publishing.</p></div></section>",
+            "source": "Auvorent V6 rendered HTML snapshot"
+          }
+        }
+      ]
+    }
+  ]
+}
