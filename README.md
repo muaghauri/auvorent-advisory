@@ -21,3 +21,4 @@ node --check seed/cms-public.js
 ```
 
 The starting content follows the V6 website; it is **not** a representation of verified consulting outcomes, customers, completed projects, finalized privacy policy, purchased domain or a production company registration.
+# auvorent-advisory
