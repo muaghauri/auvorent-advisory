@@ -314,6 +314,36 @@ def _media_root(request:Request):
     root.mkdir(parents=True,exist_ok=True)
     return root
 
+def _r2_active():
+    from .storage import r2_enabled
+    return r2_enabled()
+
+def _r2_put_media(root,name,raw,mime):
+    if not _r2_active():
+        return
+    from .storage import put_bytes
+    put_bytes(name,raw,mime)
+    thumb=root/(name+".thumb.webp")
+    if thumb.is_file():
+        put_bytes(name+".thumb.webp",thumb.read_bytes(),"image/webp")
+
+def _r2_delete_media(name):
+    if not _r2_active():
+        return
+    from .storage import delete_object
+    delete_object(name)
+    delete_object(name+".thumb.webp")
+
+def _media_bytes(root,name):
+    if _r2_active():
+        from .storage import object_exists,get_bytes
+        if object_exists(name):
+            return get_bytes(name)
+    path=root/name
+    if path.is_file():
+        return path.read_bytes()
+    return None
+
 def _media_out(asset,db):
     return {"id":asset.id,"original_name":asset.original_name,"mime_type":asset.mime_type,"kind":asset.kind,
             "icon_style":asset.icon_style,"byte_size":asset.byte_size,"width":asset.width,"height":asset.height,
@@ -410,6 +440,12 @@ async def _save_uploaded(file,kind,alt_text,caption,source_notes,decorative,icon
     temp.write_bytes(raw)
     os.replace(temp,root/name)
     _thumbnail(raw,root,name,mime)
+    try:
+        _r2_put_media(root,name,raw,mime)
+    except Exception:
+        (root/name).unlink(missing_ok=True)
+        (root/(name+".thumb.webp")).unlink(missing_ok=True)
+        raise HTTPException(503,"Media storage unavailable")
     if existing:
         before=_media_out(existing,db)
         old_name=existing.storage_name
@@ -426,9 +462,13 @@ async def _save_uploaded(file,kind,alt_text,caption,source_notes,decorative,icon
         audit(db,"media.replaced",actor=actor.id,target_type="media",target_id=existing.id,previous_checksum=before.get("sha256"),file_type=mime)
         try:db.commit()
         except Exception:
-            db.rollback();(root/name).unlink(missing_ok=True);(root/(name+".thumb.webp")).unlink(missing_ok=True);raise
+            db.rollback();(root/name).unlink(missing_ok=True);(root/(name+".thumb.webp")).unlink(missing_ok=True);_r2_delete_media(name);raise
         (root/old_name).unlink(missing_ok=True)
         (root/(old_name+".thumb.webp")).unlink(missing_ok=True)
+        try:
+            _r2_delete_media(old_name)
+        except Exception:
+            pass
         return existing
     asset=MediaAsset(id=str(uuid.uuid4()),original_name=filename,storage_name=name,sha256=hashlib.sha256(raw).hexdigest(),
                      mime_type=mime,kind=kind,icon_style=icon_style,byte_size=len(raw),width=width,height=height,
@@ -436,7 +476,7 @@ async def _save_uploaded(file,kind,alt_text,caption,source_notes,decorative,icon
     db.add(asset);audit(db,"media.uploaded",actor=actor.id,target_type="media",target_id=asset.id,kind=kind,size=len(raw))
     try:db.commit()
     except Exception:
-        db.rollback();(root/name).unlink(missing_ok=True);(root/(name+".thumb.webp")).unlink(missing_ok=True);raise
+        db.rollback();(root/name).unlink(missing_ok=True);(root/(name+".thumb.webp")).unlink(missing_ok=True);_r2_delete_media(name);raise
     return asset
 
 @router.get("/media")
@@ -463,19 +503,25 @@ def get_media(media_id:str,actor:User=Depends(require_permission("media:read")),
 
 @router.get("/media/{media_id}/file",include_in_schema=True)
 def get_media_file(media_id:str,request:Request,actor:User=Depends(require_permission("media:read")),db:Session=Depends(get_db)):
+    from fastapi.responses import Response
     asset=db.get(MediaAsset,media_id)
     if not asset:raise HTTPException(404,"Media not found")
-    path=_media_root(request)/asset.storage_name
-    if not path.is_file():raise HTTPException(404,"Asset file unavailable")
-    return FileResponse(path,media_type=asset.mime_type,filename=asset.original_name,content_disposition_type="attachment" if asset.kind=="document" else "inline",headers={"X-Content-Type-Options":"nosniff","Cache-Control":"private, no-store"})
+    data=_media_bytes(_media_root(request),asset.storage_name)
+    if data is None:raise HTTPException(404,"Asset file unavailable")
+    headers={"X-Content-Type-Options":"nosniff","Cache-Control":"private, no-store"}
+    disposition="attachment" if asset.kind=="document" else "inline"
+    safe_name=(asset.original_name or "download").replace('"',"")
+    headers["Content-Disposition"]=f'{disposition}; filename="{safe_name}"'
+    return Response(content=data,media_type=asset.mime_type,headers=headers)
 
 @router.get("/media/{media_id}/thumbnail")
 def get_thumbnail(media_id:str,request:Request,actor:User=Depends(require_permission("media:read")),db:Session=Depends(get_db)):
+    from fastapi.responses import Response
     asset=db.get(MediaAsset,media_id)
     if not asset:raise HTTPException(404,"Media not found")
-    path=_media_root(request)/(asset.storage_name+".thumb.webp")
-    if not path.is_file():raise HTTPException(404,"Thumbnail unavailable")
-    return FileResponse(path,media_type="image/webp",headers={"Cache-Control":"private, no-store"})
+    data=_media_bytes(_media_root(request),asset.storage_name+".thumb.webp")
+    if data is None:raise HTTPException(404,"Thumbnail unavailable")
+    return Response(content=data,media_type="image/webp",headers={"Cache-Control":"private, no-store"})
 
 @router.patch("/media/{media_id}",dependencies=[Depends(require_csrf)])
 def patch_media(media_id:str,payload:MediaPatch,actor:User=Depends(require_permission("media:manage")),db:Session=Depends(get_db)):
@@ -508,6 +554,11 @@ def delete_media(media_id:str,request:Request,actor:User=Depends(require_permiss
     db.delete(asset);db.commit()
     root=_media_root(request)
     (root/name).unlink(missing_ok=True)
+    (root/(name+".thumb.webp")).unlink(missing_ok=True)
+    try:
+        _r2_delete_media(name)
+    except Exception:
+        pass
     (root/(name+".thumb.webp")).unlink(missing_ok=True)
     return {"status":"deleted"}
 

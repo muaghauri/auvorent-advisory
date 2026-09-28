@@ -10,3 +10,7 @@ python-multipart>=0.0.20,<1
 Pillow>=11,<13
 defusedxml>=0.7,<1
 beautifulsoup4>=4.12,<5
+
+boto3==1.43.104
+
+psycopg[binary]>=3.2,<4
