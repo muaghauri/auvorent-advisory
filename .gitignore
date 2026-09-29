@@ -32,3 +32,7 @@ dist/
 
 # macOS
 .DS_Store
+
+# Local development backups
+.venv-py39-backup/
+backend/app/main.py.before-swagger-fix
