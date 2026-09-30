@@ -121,8 +121,38 @@ def readiness(app,db):
         source=[current/route.lstrip('/')/'index.html' for route in ['/privacy/','/terms/']]
         checks['legal_pages_not_placeholders']=all(p.is_file() and
             not re.search(r'DRAFT / LEGAL REVIEW REQUIRED|drafting placeholder|must be replaced|pending formal clearance',p.read_text(encoding='utf8'),re.I) for p in source)
-    return {'ready':all(checks.values()),'checks':checks,'active_staging_release':current.name if current else None,
-            'note':'Readiness checks are mechanical. Domain ownership, live mail deliverability, privacy counsel, trademark rights and end-to-end hosted acceptance require external verification.'}
+    publish_blockers = [
+        'staging_release',
+        'production_export_opt_in',
+        'public_api_https',
+        'admin_secure_session',
+        'database_production',
+        'website_canonical_https',
+    ]
+
+    publish_ready = all(
+        checks.get(name, False)
+        for name in publish_blockers
+    )
+
+    launch_ready = all(checks.values())
+
+    return {
+        'ready': publish_ready,
+        'publish_ready': publish_ready,
+        'launch_ready': launch_ready,
+        'checks': checks,
+        'warnings': {
+            name: value
+            for name, value in checks.items()
+            if name not in publish_blockers and not value
+        },
+        'active_staging_release': current.name if current else None,
+        'note': (
+            'Publishing readiness covers technical deployment dependencies. '
+            'SMTP, legal and brand checks remain visible as launch-readiness checks.'
+        ),
+    }
 
 
 @router.get('/integration/readiness')
