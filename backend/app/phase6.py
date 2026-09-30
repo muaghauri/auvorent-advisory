@@ -19,6 +19,7 @@ from .models import Page, PageSection, MediaAsset, SiteSetting, utcnow
 from .security import audit, get_db, require_csrf, require_permission
 from .phase5 import active_release, reset_approval, PUBLISH_LOCK, canonical_base
 from .phase6_renderer import section_fields, safe_local_url
+from .cloudflare_pages import CloudflarePagesError, deploy_pages
 
 router=APIRouter(prefix='/api/v1',tags=['V6 Integration & Deployment'])
 
@@ -153,14 +154,75 @@ def export_release(request:Request,actor=Depends(require_permission('content:pub
                 page.write_text(serialize_html(soup),encoding='utf8')
             base=canonical_base(db)
             (out/'robots.txt').write_text('User-agent: *\nAllow: /\nSitemap: '+base+'/sitemap.xml\n',encoding='utf8')
-            (out/'manifest.json').write_text(json.dumps({'source_release':active.name,
-                'exported_at':utcnow().isoformat()+'Z','status':'export_ready_not_deployed',
-                'requires':'manual host deployment and live smoke test'},indent=2),encoding='utf8')
-            audit(db,'production.exported',actor=actor.id,target_type='deployment',target_id=active.name,
-                  export_id=out.name)
+            (out/'manifest.json').write_text(json.dumps({
+                'source_release':active.name,
+                'exported_at':utcnow().isoformat()+'Z',
+                'status':'deployment_pending',
+                'provider':'cloudflare_pages'
+            },indent=2),encoding='utf8')
+
+            audit(
+                db,
+                'production.exported',
+                actor=actor.id,
+                target_type='deployment',
+                target_id=active.name,
+                export_id=out.name
+            )
             db.commit()
-            return {'status':'export_ready_not_deployed','folder':str(out),'source_release':active.name,
-                    'next_step':'Deploy the export to your verified hosting account. No live website has been modified.'}
+
+            try:
+                deployment = deploy_pages(
+                    out,
+                    branch='main',
+                    commit_message=f'CMS production release {active.name}',
+                )
+            except CloudflarePagesError as exc:
+                audit(
+                    db,
+                    'production.deploy_failed',
+                    actor=actor.id,
+                    target_type='deployment',
+                    target_id=active.name,
+                    export_id=out.name
+                )
+                db.commit()
+                raise HTTPException(
+                    502,
+                    detail={
+                        'message':'Cloudflare Pages deployment failed',
+                        'error':str(exc)[-2000:]
+                    },
+                ) from exc
+
+            (out/'manifest.json').write_text(json.dumps({
+                'source_release':active.name,
+                'exported_at':utcnow().isoformat()+'Z',
+                'status':'deployed',
+                'provider':'cloudflare_pages',
+                'project':deployment.get('project'),
+                'deployment_url':deployment.get('deployment_url')
+            },indent=2),encoding='utf8')
+
+            audit(
+                db,
+                'production.deployed',
+                actor=actor.id,
+                target_type='deployment',
+                target_id=active.name,
+                export_id=out.name
+            )
+            db.commit()
+
+            return {
+                'status':'deployed',
+                'source_release':active.name,
+                'export_id':out.name,
+                'provider':'cloudflare_pages',
+                'project':deployment.get('project'),
+                'deployment_url':deployment.get('deployment_url'),
+                'live_url':os.getenv('CMS_PUBLIC_SITE_ORIGIN','https://auvorent.com')
+            }
         except Exception:
             shutil.rmtree(out,ignore_errors=True)
             raise
