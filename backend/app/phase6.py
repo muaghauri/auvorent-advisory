@@ -9,7 +9,6 @@ import json
 import os
 import re
 import shutil
-import subprocess
 import uuid
 from pathlib import Path
 from bs4 import BeautifulSoup
@@ -154,135 +153,14 @@ def export_release(request:Request,actor=Depends(require_permission('content:pub
                 page.write_text(serialize_html(soup),encoding='utf8')
             base=canonical_base(db)
             (out/'robots.txt').write_text('User-agent: *\nAllow: /\nSitemap: '+base+'/sitemap.xml\n',encoding='utf8')
-                manifest = {
-                'source_release': active.name,
-                'exported_at': utcnow().isoformat() + 'Z',
-                'status': 'deployment_pending',
-                'provider': 'cloudflare_pages',
-            }
-            (out/'manifest.json').write_text(
-                json.dumps(manifest, indent=2),
-                encoding='utf8',
-            )
-
-            # Preserve the existing production-export audit event.
-            audit(
-                db,
-                'production.exported',
-                actor=actor.id,
-                target_type='deployment',
-                target_id=active.name,
-                export_id=out.name,
-            )
+            (out/'manifest.json').write_text(json.dumps({'source_release':active.name,
+                'exported_at':utcnow().isoformat()+'Z','status':'export_ready_not_deployed',
+                'requires':'manual host deployment and live smoke test'},indent=2),encoding='utf8')
+            audit(db,'production.exported',actor=actor.id,target_type='deployment',target_id=active.name,
+                  export_id=out.name)
             db.commit()
-
-            # Cloudflare Pages production deployment.
-            account = os.getenv('CLOUDFLARE_ACCOUNT_ID', '').strip()
-            project = os.getenv('CLOUDFLARE_PAGES_PROJECT', '').strip()
-            token = os.getenv('CLOUDFLARE_API_TOKEN', '').strip()
-
-            if not account or not project or not token:
-                raise HTTPException(
-                    500,
-                    detail='Cloudflare production deployment is not configured',
-                )
-
-            deploy_env = os.environ.copy()
-            deploy_env['CLOUDFLARE_ACCOUNT_ID'] = account
-            deploy_env['CLOUDFLARE_API_TOKEN'] = token
-            deploy_env['CI'] = 'true'
-
-            deploy = subprocess.run(
-                [
-                    'wrangler',
-                    'pages',
-                    'deploy',
-                    str(out),
-                    '--project-name',
-                    project,
-                    '--branch',
-                    'main',
-                    '--commit-message',
-                    f'CMS production release {active.name}',
-                ],
-                env=deploy_env,
-                capture_output=True,
-                text=True,
-                timeout=300,
-                check=False,
-            )
-
-            if deploy.returncode != 0:
-                failure = (
-                    deploy.stderr
-                    or deploy.stdout
-                    or 'Unknown Cloudflare deployment error'
-                )[-2000:]
-
-                audit(
-                    db,
-                    'production.deploy_failed',
-                    actor=actor.id,
-                    target_type='deployment',
-                    target_id=active.name,
-                    export_id=out.name,
-                    error=failure,
-                )
-                db.commit()
-
-                raise HTTPException(
-                    502,
-                    detail={
-                        'message': 'Cloudflare Pages deployment failed',
-                        'provider': 'cloudflare_pages',
-                        'project': project,
-                        'error': failure,
-                    },
-                )
-
-            deploy_output = (deploy.stdout or '') + '\n' + (deploy.stderr or '')
-            url_match = re.search(
-                r'https://[^\s]+\.pages\.dev',
-                deploy_output,
-            )
-            deployment_url = url_match.group(0) if url_match else None
-
-            manifest.update({
-                'status': 'deployed',
-                'deployed_at': utcnow().isoformat() + 'Z',
-                'project': project,
-                'production_branch': 'main',
-                'deployment_url': deployment_url,
-            })
-            (out/'manifest.json').write_text(
-                json.dumps(manifest, indent=2),
-                encoding='utf8',
-            )
-
-            audit(
-                db,
-                'production.deployed',
-                actor=actor.id,
-                target_type='deployment',
-                target_id=active.name,
-                export_id=out.name,
-                project=project,
-                deployment_url=deployment_url or '',
-            )
-            db.commit()
-
-            return {
-                'status': 'deployed',
-                'source_release': active.name,
-                'export_id': out.name,
-                'provider': 'cloudflare_pages',
-                'project': project,
-                'deployment_url': deployment_url,
-                'live_url': os.getenv(
-                    'CMS_PUBLIC_SITE_ORIGIN',
-                    'https://auvorent.com',
-                ),
-            }
+            return {'status':'export_ready_not_deployed','folder':str(out),'source_release':active.name,
+                    'next_step':'Deploy the export to your verified hosting account. No live website has been modified.'}
         except Exception:
             shutil.rmtree(out,ignore_errors=True)
             raise
