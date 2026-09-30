@@ -179,7 +179,7 @@ def export_release(request:Request,actor=Depends(require_permission('content:pub
                 soup=BeautifulSoup(page.read_text(encoding='utf8'),'html.parser')
                 robots=soup.find('meta',attrs={'name':'robots'})
                 if robots and robots.get('data-planned-robots'):
-                    robots['content']=robots.pop('data-planned-robots')
+                    robots['content']=robots.attrs.pop('data-planned-robots')
                 from .phase6_renderer import serialize_html
                 page.write_text(serialize_html(soup),encoding='utf8')
             base=canonical_base(db)
