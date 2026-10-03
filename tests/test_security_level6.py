@@ -46,6 +46,35 @@ def test_r2_keys_are_restricted():
             storage._safe_key(bad)
 
 
+def test_r2_endpoint_must_be_clean_https_origin():
+    assert storage._safe_endpoint("https://example.r2.cloudflarestorage.com/") == "https://example.r2.cloudflarestorage.com"
+    for bad in (
+        "http://example.r2.cloudflarestorage.com",
+        "https://user:pass@example.r2.cloudflarestorage.com",
+        "https://example.r2.cloudflarestorage.com/path",
+        "https://example.r2.cloudflarestorage.com?debug=1",
+        "javascript:alert(1)",
+    ):
+        with pytest.raises(RuntimeError):
+            storage._safe_endpoint(bad)
+
+
+def test_r2_bucket_name_is_restricted(monkeypatch):
+    monkeypatch.setenv("R2_BUCKET", "auvorent-media")
+    assert storage.bucket_name() == "auvorent-media"
+    for bad in ("", "/bad", "bad bucket", "x" * 64):
+        monkeypatch.setenv("R2_BUCKET", bad)
+        with pytest.raises(RuntimeError):
+            storage.bucket_name()
+
+
+def test_r2_put_rejects_oversized_objects_before_network(monkeypatch):
+    monkeypatch.setenv("R2_BUCKET", "auvorent-media")
+    oversized = b"x" * (storage.MAX_OBJECT_BYTES + 1)
+    with pytest.raises(ValueError):
+        storage.put_bytes("safe-object.webp", oversized, "image/webp")
+
+
 def test_cloudflare_deploy_inputs_are_bounded():
     cloudflare_pages._validate_deploy_inputs("auvorent-site", "main", "Security release", 300)
     for project in ("", "-bad", "Bad Project", "x" * 70):
