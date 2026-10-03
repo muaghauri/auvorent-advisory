@@ -3,7 +3,7 @@ import json
 import pytest
 
 from backend.app import cloudflare_pages, config, storage
-from backend.app.security import _sanitize_audit_value
+from backend.app.security import _sanitize_audit_value, _valid_browser_token
 
 
 def test_weak_secret_rejects_predictable_values():
@@ -22,6 +22,13 @@ def test_production_origin_requires_clean_https():
     ):
         with pytest.raises(RuntimeError):
             config._validated_origin("TEST", bad, production=True)
+
+
+def test_browser_tokens_require_urlsafe_bounded_format():
+    assert _valid_browser_token("A" * 32)
+    assert _valid_browser_token("abc_DEF-123" * 4)
+    for bad in (None, "", "short", "A" * 257, "A" * 31, "A" * 31 + "!", "A" * 40 + "\n"):
+        assert not _valid_browser_token(bad)
 
 
 def test_audit_redaction_is_recursive_and_bounded():
