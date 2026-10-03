@@ -17,6 +17,7 @@ from .models import CMSession, User, AuditLog, utcnow
 
 _hasher = PasswordHasher(time_cost=2, memory_cost=32768, parallelism=2)
 _dummy_hash = _hasher.hash(secrets.token_urlsafe(24))
+_MAX_BROWSER_TOKEN = 256
 
 ROLES = ("super_admin", "admin", "editor", "reviewer", "viewer")
 PERMISSIONS: dict[str, set[str]] = {
@@ -78,8 +79,13 @@ def audit(db: Session, action: str, actor: str | None = None, target_type: str =
     # Defense in depth: callers should never pass credentials, but redact likely
     # sensitive values centrally in case a future code path does so accidentally.
     safe_details = {str(k)[:120]: _sanitize_audit_value(v, key=str(k)) for k, v in list(details.items())[:100]}
-    db.add(AuditLog(actor_user_id=actor, action=action[:160], target_type=target_type[:80], target_id=target_id,
-                    detail=json.dumps(safe_details, separators=(",", ":"), sort_keys=True)))
+    db.add(AuditLog(
+        actor_user_id=actor,
+        action=action[:160],
+        target_type=target_type[:80],
+        target_id=str(target_id)[:160] if target_id is not None else None,
+        detail=json.dumps(safe_details, separators=(",", ":"), sort_keys=True),
+    ))
 
 
 def get_db(request: Request):
@@ -90,11 +96,19 @@ def get_db(request: Request):
 def require_csrf(request: Request):
     cookie = request.cookies.get("auv_csrf")
     header = request.headers.get("X-CSRF-Token")
-    if not cookie or not header or not hmac.compare_digest(cookie, header):
+    if (
+        not cookie
+        or not header
+        or len(cookie) > _MAX_BROWSER_TOKEN
+        or len(header) > _MAX_BROWSER_TOKEN
+        or not hmac.compare_digest(cookie, header)
+    ):
         raise HTTPException(403, "Invalid CSRF token")
 
     origin = request.headers.get("origin")
     if origin:
+        if len(origin) > 512:
+            raise HTTPException(403, "Cross-origin request rejected")
         expected = request.app.state.settings.public_origin or str(request.base_url).rstrip("/")
         actual_parsed = urlparse(origin)
         expected_parsed = urlparse(expected)
@@ -109,7 +123,7 @@ def require_csrf(request: Request):
 
 def current_user(request: Request, db: Session = Depends(get_db)) -> User:
     token = request.cookies.get("auv_admin_session")
-    if not token:
+    if not token or len(token) > _MAX_BROWSER_TOKEN:
         raise HTTPException(401, "Authentication required")
     sess = db.query(CMSession).filter(CMSession.token_hash == fingerprint_token(token), CMSession.revoked_at.is_(None), CMSession.expires_at > utcnow()).first()
     if not sess:
@@ -121,12 +135,19 @@ def current_user(request: Request, db: Session = Depends(get_db)) -> User:
 
 
 def require_permission(permission: str) -> Callable:
+    if not permission or not any(permission in allowed for allowed in PERMISSIONS.values()):
+        raise ValueError(f"Unknown CMS permission: {permission}")
+
     def check(user: User = Depends(current_user)) -> User:
         if user.must_change_password:
             raise HTTPException(403, "Change your password before continuing")
         if permission not in PERMISSIONS.get(user.role, set()):
             raise HTTPException(403, "Insufficient permissions")
         return user
+
+    # Security regression tests can inspect the exact server-side permission
+    # attached to a route without changing FastAPI's dependency behavior.
+    check.required_permission = permission
     return check
 
 
