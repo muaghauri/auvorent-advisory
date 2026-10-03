@@ -13,6 +13,20 @@ class CloudflarePagesError(RuntimeError):
 
 _PROJECT_RE = re.compile(r"^[a-z0-9][a-z0-9-]{0,62}$")
 _BRANCH_RE = re.compile(r"^[A-Za-z0-9._/-]{1,120}$")
+_ACCOUNT_RE = re.compile(r"^[a-fA-F0-9]{32}$")
+_ENV_PASSTHROUGH = {
+    "HOME",
+    "LANG",
+    "LC_ALL",
+    "NODE_PATH",
+    "PATH",
+    "SSL_CERT_DIR",
+    "SSL_CERT_FILE",
+    "TEMP",
+    "TMP",
+    "TMPDIR",
+    "USER",
+}
 
 
 def deployment_status() -> dict:
@@ -52,6 +66,29 @@ def _redact(text: str, *secrets_to_hide: str) -> str:
     return clean
 
 
+def _deployment_env(account_id: str, token: str) -> dict[str, str]:
+    """Give Wrangler only the runtime values it actually needs.
+
+    The Railway process also holds database, R2, mail and session secrets. Those
+    values must not be inherited by the Node/Wrangler child process simply
+    because it is launched from the CMS runtime.
+    """
+    env = {
+        key: value
+        for key, value in os.environ.items()
+        if key in _ENV_PASSTHROUGH and value
+    }
+    env.update(
+        {
+            "CLOUDFLARE_ACCOUNT_ID": account_id,
+            "CLOUDFLARE_API_TOKEN": token,
+            "CI": "true",
+            "NO_COLOR": "1",
+        }
+    )
+    return env
+
+
 def deploy_pages(
     directory: str | Path,
     *,
@@ -69,32 +106,26 @@ def deploy_pages(
     project = os.getenv("CLOUDFLARE_PAGES_PROJECT", "").strip()
     token = os.getenv("CLOUDFLARE_API_TOKEN", "").strip()
 
-    missing = []
-    if not account_id:
-        missing.append("CLOUDFLARE_ACCOUNT_ID")
-    if not project:
-        missing.append("CLOUDFLARE_PAGES_PROJECT")
-    if not token:
-        missing.append("CLOUDFLARE_API_TOKEN")
-
-    if missing:
+    if not account_id or not project or not token:
         raise CloudflarePagesError("Cloudflare deployment configuration is incomplete.")
+    if not _ACCOUNT_RE.fullmatch(account_id):
+        raise CloudflarePagesError("Invalid Cloudflare account configuration.")
+    if len(token) < 20 or len(token) > 512 or any(ord(ch) < 33 for ch in token):
+        raise CloudflarePagesError("Invalid Cloudflare API token configuration.")
 
     _validate_deploy_inputs(project, branch, commit_message, timeout)
 
     wrangler = shutil.which("wrangler")
     if not wrangler:
         raise CloudflarePagesError("Cloudflare deployment runtime is unavailable.")
+    wrangler_path = Path(wrangler).resolve()
+    if not wrangler_path.is_file() or not wrangler_path.is_absolute():
+        raise CloudflarePagesError("Cloudflare deployment runtime is invalid.")
 
-    env = os.environ.copy()
-    env["CLOUDFLARE_ACCOUNT_ID"] = account_id
-    env["CLOUDFLARE_API_TOKEN"] = token
-    env["CI"] = "true"
-    # Keep subprocess behavior deterministic and avoid interactive prompts.
-    env["NO_COLOR"] = "1"
+    env = _deployment_env(account_id, token)
 
     command = [
-        wrangler,
+        str(wrangler_path),
         "pages",
         "deploy",
         str(directory),
@@ -121,10 +152,11 @@ def deploy_pages(
         raise CloudflarePagesError("Cloudflare deployment process could not start.") from exc
 
     output = _redact("\n".join(part for part in [result.stdout, result.stderr] if part), token, account_id)
+    output = "".join(ch for ch in output if ch in "\n\t" or ord(ch) >= 32)
 
     if result.returncode != 0:
         # Keep provider diagnostics bounded and scrubbed; no environment dump/path disclosure.
-        raise CloudflarePagesError("Cloudflare Pages deployment failed. Provider output: " + output[-1500:])
+        raise CloudflarePagesError("Cloudflare Pages deployment failed. Provider output: " + output[-1200:])
 
     match = re.search(r"https://[A-Za-z0-9.-]+\.pages\.dev(?:/[^\s]*)?", output)
 
