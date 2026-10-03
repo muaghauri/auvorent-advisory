@@ -1,7 +1,9 @@
 from __future__ import annotations
+
 import hashlib
 import hmac
 import json
+import re
 import secrets
 import uuid
 from datetime import timedelta
@@ -9,15 +11,16 @@ from typing import Callable
 from urllib.parse import urlparse
 
 from argon2 import PasswordHasher
-from argon2.exceptions import VerifyMismatchError, VerificationError
+from argon2.exceptions import VerificationError, VerifyMismatchError
 from fastapi import Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
-from .models import CMSession, User, AuditLog, utcnow
+from .models import AuditLog, CMSession, User, utcnow
 
 _hasher = PasswordHasher(time_cost=2, memory_cost=32768, parallelism=2)
 _dummy_hash = _hasher.hash(secrets.token_urlsafe(24))
 _MAX_BROWSER_TOKEN = 256
+_BROWSER_TOKEN_RE = re.compile(r"^[A-Za-z0-9_-]{32,256}$")
 
 ROLES = ("super_admin", "admin", "editor", "reviewer", "viewer")
 PERMISSIONS: dict[str, set[str]] = {
@@ -93,17 +96,21 @@ def get_db(request: Request):
         yield db
 
 
+def _valid_browser_token(value: str | None) -> bool:
+    return bool(value and len(value) <= _MAX_BROWSER_TOKEN and _BROWSER_TOKEN_RE.fullmatch(value))
+
+
 def require_csrf(request: Request):
     cookie = request.cookies.get("auv_csrf")
     header = request.headers.get("X-CSRF-Token")
-    if (
-        not cookie
-        or not header
-        or len(cookie) > _MAX_BROWSER_TOKEN
-        or len(header) > _MAX_BROWSER_TOKEN
-        or not hmac.compare_digest(cookie, header)
-    ):
+    if not _valid_browser_token(cookie) or not _valid_browser_token(header) or not hmac.compare_digest(cookie, header):
         raise HTTPException(403, "Invalid CSRF token")
+
+    # Modern browsers tell us whether a request originated cross-site. Treat an
+    # explicit cross-site signal as hostile even if another header is missing.
+    fetch_site = request.headers.get("sec-fetch-site", "").strip().lower()
+    if fetch_site and fetch_site not in {"same-origin", "same-site", "none"}:
+        raise HTTPException(403, "Cross-origin request rejected")
 
     origin = request.headers.get("origin")
     if origin:
@@ -113,7 +120,13 @@ def require_csrf(request: Request):
         actual_parsed = urlparse(origin)
         expected_parsed = urlparse(expected)
         if (
-            actual_parsed.scheme != expected_parsed.scheme
+            actual_parsed.username
+            or actual_parsed.password
+            or actual_parsed.path not in ("", "/")
+            or actual_parsed.params
+            or actual_parsed.query
+            or actual_parsed.fragment
+            or actual_parsed.scheme != expected_parsed.scheme
             or actual_parsed.hostname != expected_parsed.hostname
             or (actual_parsed.port or (443 if actual_parsed.scheme == "https" else 80))
                != (expected_parsed.port or (443 if expected_parsed.scheme == "https" else 80))
@@ -123,7 +136,7 @@ def require_csrf(request: Request):
 
 def current_user(request: Request, db: Session = Depends(get_db)) -> User:
     token = request.cookies.get("auv_admin_session")
-    if not token or len(token) > _MAX_BROWSER_TOKEN:
+    if not _valid_browser_token(token):
         raise HTTPException(401, "Authentication required")
     sess = db.query(CMSession).filter(CMSession.token_hash == fingerprint_token(token), CMSession.revoked_at.is_(None), CMSession.expires_at > utcnow()).first()
     if not sess:
