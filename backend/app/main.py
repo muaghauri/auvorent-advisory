@@ -26,10 +26,13 @@ from .phase5 import router as phase5_router
 from .phase6 import router as phase6_router
 from .security import (
     ROLES, audit, create_session, current_user, fingerprint_token,
-    get_db, hash_password, require_csrf, require_permission, user_out, verify_password,
+    get_db, hash_password, require_csrf, require_permission, sanitize_audit_detail,
+    user_out, verify_password,
 )
 
 FRONTEND = Path(__file__).resolve().parents[2] / "frontend"
+MAX_API_REQUEST_BYTES = 12 * 1024 * 1024
+MAX_PUBLIC_JSON_BYTES = 128 * 1024
 
 MODULES = [
     {"id": 1,"name": "Foundation & Security", "status": "implemented", "description": "Login, roles, account administration, audit and dashboard"},
@@ -84,11 +87,32 @@ def create_app(settings: Settings | None = None, *, create_schema: bool | None =
 
     @app.middleware("http")
     async def security_headers(request: Request, call_next):
+        # Reject obviously oversized requests before JSON/multipart parsing. Media
+        # uploads remain supported up to their existing 10 MB application limit.
+        content_length = request.headers.get("content-length")
+        if content_length:
+            try:
+                declared = int(content_length)
+            except ValueError:
+                return JSONResponse({"detail": "Invalid Content-Length"}, status_code=400)
+            if declared < 0 or declared > MAX_API_REQUEST_BYTES:
+                return JSONResponse({"detail": "Request body too large"}, status_code=413)
+            if request.url.path.startswith("/api/v1/public/") and declared > MAX_PUBLIC_JSON_BYTES:
+                return JSONResponse({"detail": "Public request body too large"}, status_code=413)
+
+        if request.method in {"POST", "PUT", "PATCH"} and request.url.path.startswith("/api/v1/public/"):
+            content_type = request.headers.get("content-type", "").split(";", 1)[0].strip().lower()
+            if content_type != "application/json":
+                return JSONResponse({"detail": "Public API accepts application/json only"}, status_code=415)
+
         response = await call_next(request)
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-Permitted-Cross-Domain-Policies"] = "none"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+        response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
+        response.headers["Cross-Origin-Resource-Policy"] = "same-site"
         if request.url.path == "/api/docs":
             response.headers["Content-Security-Policy"] = (
                 "default-src 'self'; "
@@ -289,7 +313,7 @@ def create_app(settings: Settings | None = None, *, create_schema: bool | None =
         rows = db.query(AuditLog).order_by(AuditLog.id.desc()).offset(offset).limit(limit).all()
         return {"items":[{"id":row.id,"action":row.action,"actor_user_id":row.actor_user_id,
                            "target_type":row.target_type,"target_id":row.target_id,
-                           "detail":row.detail,"created_at":row.created_at.isoformat()+"Z"} for row in rows],
+                           "detail":sanitize_audit_detail(row.detail),"created_at":row.created_at.isoformat()+"Z"} for row in rows],
                 "total":db.query(func.count(AuditLog.id)).scalar(),"limit":limit,"offset":offset}
 
     return app

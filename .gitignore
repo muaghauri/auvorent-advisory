@@ -1,34 +1,42 @@
-.env
-.venv/
-__pycache__/
-*.pyc
-.pytest_cache/
-instance/*.sqlite
-instance/*.sqlite-*
-instance/media/*
-!instance/media/.gitkeep
-
 # Environment and credentials
 .env
 .env.*
 !.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
 
-# Local database and generated files
-instance/
-*.sqlite
-*.sqlite3
-*.db
-
-# Python
+# Python environments and caches
 .venv/
-.venv312/
+.venv*/
 __pycache__/
 *.pyc
 .pytest_cache/
 
+# Local database, media and generated state
+instance/
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.db
+previews/
+
 # Frontend
 node_modules/
 dist/
+
+# Coverage / reports
+.coverage
+coverage.xml
+htmlcov/
+
+# Archives and local exports
+*.zip
+*.tar
+*.tar.gz
 
 # macOS
 .DS_Store

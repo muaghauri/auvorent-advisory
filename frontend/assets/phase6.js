@@ -1,19 +1,66 @@
 "use strict";
 (function(){
-  const pane=document.createElement('dialog');
-  pane.id='phase6-visual-dialog';pane.className='phase6-modal';
-  pane.innerHTML='<form method="dialog" class="visual-shell"><header><div><span class="eyebrow">PHASE 6 / V6 VISUAL EDITOR</span><h2>Update this section</h2><p>Change approved V6 copy, images and links while preserving its responsive layout. Save as draft before review.</p></div><button class="button secondary small" value="cancel" aria-label="Close visual editor">Close</button></header><div id="phase6-fields" class="visual-fields"></div><footer><button type="button" id="phase6-save" class="button primary">Save as draft</button></footer></form>';
+  function node(tag, attrs={}, text=null){
+    const element=document.createElement(tag);
+    for(const [key,value] of Object.entries(attrs)){
+      if(key==='className') element.className=value;
+      else if(key==='dataset') Object.assign(element.dataset,value);
+      else if(key==='type') element.type=value;
+      else element.setAttribute(key,String(value));
+    }
+    if(text!==null) element.textContent=text;
+    return element;
+  }
+
+  const pane=node('dialog',{id:'phase6-visual-dialog',className:'phase6-modal'});
+  const form=node('form',{method:'dialog',className:'visual-shell'});
+  const header=node('header');
+  const headerCopy=node('div');
+  headerCopy.append(
+    node('span',{className:'eyebrow'},'PHASE 6 / V6 VISUAL EDITOR'),
+    node('h2',{},'Update this section'),
+    node('p',{},'Change approved V6 copy, images and links while preserving its responsive layout. Save as draft before review.')
+  );
+  const close=node('button',{className:'button secondary small',value:'cancel','aria-label':'Close visual editor'},'Close');
+  header.append(headerCopy,close);
+  const visualFields=node('div',{id:'phase6-fields',className:'visual-fields'});
+  const footer=node('footer');
+  footer.append(node('button',{type:'button',id:'phase6-save',className:'button primary'},'Save as draft'));
+  form.append(header,visualFields,footer);
+  pane.append(form);
   document.body.append(pane);
+
   let current=null,fieldValues=[];
   const parent=document.getElementById('view-publishing');
-  if(parent){const target=document.createElement('section');target.className='table-panel phase6-readiness';target.innerHTML='<div class="table-head"><div><span class="eyebrow">PHASE 06 · SITE INTEGRATION</span><h2>Production readiness gates</h2><p>Publishing continues to generate private staging releases. Public export requires all external checks below.</p></div><button type="button" id="phase6-refresh" class="button secondary small">Refresh readiness</button></div><div id="phase6-checks" class="phase6-checks"></div><p id="phase6-status" class="helper"></p><button type="button" id="phase6-export" class="button secondary small">Export production-ready build</button>';
-    parent.append(target);target.querySelector('#phase6-refresh').addEventListener('click',load);
+  if(parent){
+    const target=node('section',{className:'table-panel phase6-readiness'});
+    const tableHead=node('div',{className:'table-head'});
+    const copy=node('div');
+    copy.append(
+      node('span',{className:'eyebrow'},'PHASE 06 · SITE INTEGRATION'),
+      node('h2',{},'Production readiness gates'),
+      node('p',{},'Publishing continues to generate private staging releases. Public export requires all external checks below.')
+    );
+    const refresh=node('button',{type:'button',id:'phase6-refresh',className:'button secondary small'},'Refresh readiness');
+    tableHead.append(copy,refresh);
+    target.append(
+      tableHead,
+      node('div',{id:'phase6-checks',className:'phase6-checks'}),
+      node('p',{id:'phase6-status',className:'helper'}),
+      node('button',{type:'button',id:'phase6-export',className:'button secondary small'},'Export production-ready build')
+    );
+    parent.append(target);
+    refresh.addEventListener('click',load);
     target.querySelector('#phase6-export').addEventListener('click',async()=>{
-      if(!confirm('Create a production export only if trademark, legal, SMTP and hosting have been verified? This does not deploy to a domain.'))return;
-      try{const result=await api('/integration/export-production',{method:'POST',body:'{}'});toast('Export created: '+result.folder);await load();}
-      catch(e){toast(messageOf(e),true);}
+      if(!confirm('Create a production export only if trademark, legal, SMTP and hosting have been verified?'))return;
+      try{
+        const result=await api('/integration/export-production',{method:'POST',body:'{}'});
+        toast('Production deployment completed: '+(result.export_id||result.source_release||'release'));
+        await load();
+      }catch(e){toast(messageOf(e),true);}
     });
   }
+
   const fields=()=>document.getElementById('phase6-fields');
   const heading=(title)=>{const x=document.createElement('h3');x.textContent=title;fields().append(x);};
   function addField(field, media){
@@ -36,6 +83,7 @@
     fields().append(label);
     fieldValues.push({field,input,original:field.value});
   }
+
   async function open(section){
     current=section;fieldValues=[];fields().replaceChildren();
     try{
@@ -49,6 +97,7 @@
       pane.showModal();
     }catch(e){toast(messageOf(e),true);}
   }
+
   pane.querySelector('#phase6-save').addEventListener('click',async()=>{
     if(!current)return;
     const data={text_overrides:{},image_overrides:{},icon_overrides:{},alt_overrides:{},link_overrides:{}};
@@ -64,6 +113,7 @@
       else if(typeof state!=='undefined'&&state.selectedPage)await selectPage(state.selectedPage.id);
     }catch(e){toast(messageOf(e),true);}
   });
+
   async function load(){const box=document.getElementById('phase6-checks');if(!box)return;
     try{const report=await api('/integration/readiness');box.replaceChildren();
       Object.entries(report.checks).forEach(([key,value])=>{const span=document.createElement('div');span.className='phase6-check '+(value?'passed':'pending');const badge=document.createElement('span');badge.textContent=value?'✓':'!';const text=document.createElement('span');text.textContent=key.replaceAll('_',' ');span.append(badge,text);box.append(span);});

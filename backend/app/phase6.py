@@ -11,17 +11,22 @@ import re
 import shutil
 import uuid
 from pathlib import Path
+
 from bs4 import BeautifulSoup
 from fastapi import APIRouter, Depends, HTTPException, Request
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from sqlalchemy.orm import Session
-from .models import Page, PageSection, MediaAsset, SiteSetting, utcnow
-from .security import audit, get_db, require_csrf, require_permission
-from .phase5 import active_release, reset_approval, PUBLISH_LOCK, canonical_base
-from .phase6_renderer import section_fields, safe_local_url
+
 from .cloudflare_pages import CloudflarePagesError, deploy_pages
+from .models import MediaAsset, Page, PageSection, utcnow
+from .phase5 import PUBLISH_LOCK, _assert_release_tree_safe, active_release, canonical_base, reset_approval
+from .phase6_renderer import safe_local_url, section_fields
+from .security import audit, get_db, require_csrf, require_permission
 
 router=APIRouter(prefix='/api/v1',tags=['V6 Integration & Deployment'])
+CONTROL=re.compile(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]')
+FIELD_KEY=re.compile(r'^(?:text|image|icon|link)_[0-9]{1,4}$')
+MAX_VISUAL_PAYLOAD_BYTES=256*1024
 
 
 class VisualEdit(BaseModel):
@@ -31,6 +36,63 @@ class VisualEdit(BaseModel):
     alt_overrides: dict[str,str] = Field(default_factory=dict,max_length=30)
     icon_overrides: dict[str,str] = Field(default_factory=dict,max_length=80)
     link_overrides: dict[str,str] = Field(default_factory=dict,max_length=100)
+
+    @field_validator('text_overrides')
+    @classmethod
+    def safe_text_overrides(cls, values):
+        for key,value in values.items():
+            if not FIELD_KEY.fullmatch(key) or not key.startswith('text_'):
+                raise ValueError('Invalid visual text field key')
+            if len(value)>12000 or CONTROL.search(value):
+                raise ValueError('Visual text contains prohibited or oversized content')
+        return values
+
+    @field_validator('alt_overrides')
+    @classmethod
+    def safe_alt_overrides(cls, values):
+        for key,value in values.items():
+            if not FIELD_KEY.fullmatch(key) or not key.startswith('image_'):
+                raise ValueError('Invalid image alt field key')
+            if len(value)>300 or CONTROL.search(value):
+                raise ValueError('Image alt text contains prohibited or oversized content')
+        return values
+
+    @field_validator('image_overrides')
+    @classmethod
+    def safe_image_overrides(cls, values):
+        for key,value in values.items():
+            if not FIELD_KEY.fullmatch(key) or not key.startswith('image_'):
+                raise ValueError('Invalid image override field key')
+            if not value or len(value)>300 or CONTROL.search(value) or '\\' in value:
+                raise ValueError('Invalid image override value')
+        return values
+
+    @field_validator('icon_overrides')
+    @classmethod
+    def safe_icon_overrides(cls, values):
+        for key,value in values.items():
+            if not FIELD_KEY.fullmatch(key) or not key.startswith('icon_'):
+                raise ValueError('Invalid icon override field key')
+            if not value or len(value)>120 or CONTROL.search(value) or '\\' in value:
+                raise ValueError('Invalid icon override value')
+        return values
+
+    @field_validator('link_overrides')
+    @classmethod
+    def safe_link_overrides(cls, values):
+        for key,value in values.items():
+            if not FIELD_KEY.fullmatch(key) or not key.startswith('link_'):
+                raise ValueError('Invalid link override field key')
+            if len(value)>300 or CONTROL.search(value) or not safe_local_url(value):
+                raise ValueError('Links must use safe website-relative paths')
+        return values
+
+    @model_validator(mode='after')
+    def bounded_payload(self):
+        encoded=json.dumps(self.model_dump(),ensure_ascii=False,separators=(',',':')).encode('utf-8')
+        if len(encoded)>MAX_VISUAL_PAYLOAD_BYTES:
+            raise ValueError('Visual edit payload is too large')
+        return self
 
 
 def get_section(db, section_id):
@@ -64,10 +126,6 @@ def edit_visual(section_id:str,payload:VisualEdit,actor=Depends(require_permissi
     icons={f['key'] for f in fields if f['kind']=='icon'}
     if set(payload.text_overrides)-texts or set(payload.image_overrides)-images or set(payload.alt_overrides)-images or set(payload.link_overrides)-links or set(payload.icon_overrides)-icons:
         raise HTTPException(422,'Unknown visual field key')
-    if any(len(x)>12000 for x in payload.text_overrides.values()):raise HTTPException(422,'Visual text is too long')
-    if any(len(x)>300 for x in payload.alt_overrides.values()):raise HTTPException(422,'Image alt text is too long')
-    for key,url in payload.link_overrides.items():
-        if not safe_local_url(url):raise HTTPException(422,f'Links must use safe website-relative paths: {key}')
     resolved={}
     for key,value in payload.image_overrides.items():
         media=db.get(MediaAsset,value)
@@ -130,11 +188,7 @@ def readiness(app,db):
         'website_canonical_https',
     ]
 
-    publish_ready = all(
-        checks.get(name, False)
-        for name in publish_blockers
-    )
-
+    publish_ready = all(checks.get(name, False) for name in publish_blockers)
     launch_ready = all(checks.values())
 
     return {
@@ -170,10 +224,14 @@ def export_release(request:Request,actor=Depends(require_permission('content:pub
     with PUBLISH_LOCK:
         active=active_release(root)
         if not active:raise HTTPException(409,'No staging release')
+        try:_assert_release_tree_safe(active)
+        except RuntimeError as exc:raise HTTPException(409,'Staging release integrity check failed') from exc
         exports=root/'exports';exports.mkdir(exist_ok=True,parents=True)
         out=exports/('production-'+uuid.uuid4().hex)
         try:
-            shutil.copytree(active,out)
+            shutil.copytree(active,out,symlinks=False)
+            try:_assert_release_tree_safe(out)
+            except RuntimeError as exc:raise HTTPException(409,'Production export integrity check failed') from exc
             # Only approved, explicitly indexable pages carry a planned index directive.
             for page in out.rglob('index.html'):
                 soup=BeautifulSoup(page.read_text(encoding='utf8'),'html.parser')
@@ -202,11 +260,15 @@ def export_release(request:Request,actor=Depends(require_permission('content:pub
             db.commit()
 
             try:
+                # Recheck immediately before the provider process sees the tree.
+                _assert_release_tree_safe(out)
                 deployment = deploy_pages(
                     out,
                     branch='main',
                     commit_message=f'CMS production release {active.name}',
                 )
+            except RuntimeError as exc:
+                raise HTTPException(409,'Production export integrity check failed') from exc
             except CloudflarePagesError as exc:
                 audit(
                     db,
@@ -217,11 +279,13 @@ def export_release(request:Request,actor=Depends(require_permission('content:pub
                     export_id=out.name
                 )
                 db.commit()
+                message=str(exc)[-2000:]
+                message=''.join(ch for ch in message if ch in '\n\t' or ord(ch)>=32)
                 raise HTTPException(
                     502,
                     detail={
                         'message':'Cloudflare Pages deployment failed',
-                        'error':str(exc)[-2000:]
+                        'error':message
                     },
                 ) from exc
 

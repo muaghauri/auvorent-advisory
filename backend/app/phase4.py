@@ -19,7 +19,7 @@ from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel, EmailStr, Field, ValidationError, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, ValidationError, field_validator, model_validator
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -30,6 +30,9 @@ from .security import audit, get_db, require_csrf, require_permission
 router = APIRouter(prefix="/api/v1", tags=["Leads & Assessments"])
 SLUG = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 KEY = re.compile(r"^[a-z][a-z0-9_]{0,49}$")
+CONTROL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
+SAFE_SOURCE_PAGE = re.compile(r"^/[A-Za-z0-9/_\-.]*$")
+UTM_KEYS = {"utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"}
 INQUIRY_STATUSES = {"new", "reviewed", "qualified", "follow_up", "converted", "closed", "spam"}
 
 
@@ -45,7 +48,14 @@ def iso(dt):
     return dt.isoformat() + "Z" if dt else None
 
 
+def _plain_text(value: str, label: str = "Text") -> str:
+    if CONTROL.search(value):
+        raise ValueError(f"{label} contains prohibited control characters")
+    return value
+
+
 class FormField(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     id: str = Field(max_length=50)
     label: str = Field(min_length=1, max_length=120)
     type: Literal["text", "email", "textarea", "select", "checkbox"]
@@ -62,19 +72,25 @@ class FormField(BaseModel):
             raise ValueError("Field ID must be lowercase letters, numbers or underscores")
         return v
 
+    @field_validator("label", "placeholder", "help_text")
+    @classmethod
+    def safe_copy(cls, v):
+        return _plain_text(v)
+
     @model_validator(mode="after")
     def options_valid(self):
         if self.type == "select":
             if not self.options or len(set(self.options)) != len(self.options):
                 raise ValueError("Select fields require unique options")
-            if any(not x or len(x) > 120 for x in self.options):
-                raise ValueError("Select option length must be 1–120 characters")
+            if any(not x or len(x) > 120 or CONTROL.search(x) for x in self.options):
+                raise ValueError("Select option length must be 1–120 safe characters")
         elif self.options:
             raise ValueError("Only select fields have options")
         return self
 
 
 class FormCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     slug: str = Field(min_length=3, max_length=100)
     title: str = Field(min_length=3, max_length=180)
     intro: str = Field(default="", max_length=1500)
@@ -89,6 +105,11 @@ class FormCreate(BaseModel):
             raise ValueError("Invalid form slug")
         return v
 
+    @field_validator("title", "intro", "success_message")
+    @classmethod
+    def safe_copy(cls, v):
+        return _plain_text(v)
+
     @model_validator(mode="after")
     def distinct_fields(self):
         ids = [f.id for f in self.fields]
@@ -100,11 +121,17 @@ class FormCreate(BaseModel):
 
 
 class FormPatch(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     title: str | None = Field(default=None, min_length=3, max_length=180)
     intro: str | None = Field(default=None, max_length=1500)
     success_message: str | None = Field(default=None, min_length=3, max_length=500)
     fields: list[FormField] | None = Field(default=None, min_length=1, max_length=30)
     is_active: bool | None = None
+
+    @field_validator("title", "intro", "success_message")
+    @classmethod
+    def safe_copy(cls, v):
+        return _plain_text(v) if v is not None else v
 
     @model_validator(mode="after")
     def distinct_fields(self):
@@ -116,6 +143,7 @@ class FormPatch(BaseModel):
 
 
 class LeadSettingsPatch(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     recipient_email: EmailStr
     cc: list[EmailStr] = Field(default_factory=list, max_length=5)
     reply_enabled: bool = False
@@ -124,37 +152,86 @@ class LeadSettingsPatch(BaseModel):
     @field_validator("subject_prefix")
     @classmethod
     def safe_subject(cls, value):
-        if "\n" in value or "\r" in value:
-            raise ValueError("Email subject prefix cannot contain line breaks")
-        return value
+        if "\n" in value or "\r" in value or CONTROL.search(value):
+            raise ValueError("Email subject prefix contains prohibited characters")
+        return value.strip()
 
 
 class PublicFormSubmission(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     data: dict[str, Any] = Field(default_factory=dict)
     consent: bool
     website: str = Field(default="", max_length=200)  # Honeypot; must be visually hidden on public V6 form.
     source_page: str = Field(default="", max_length=300)
     utm: dict[str, str] = Field(default_factory=dict)
 
+    @field_validator("website")
+    @classmethod
+    def safe_honeypot(cls, value):
+        return _plain_text(value, "Honeypot")
+
+    @field_validator("source_page")
+    @classmethod
+    def safe_source(cls, value):
+        value = value.strip()
+        if value and (
+            not SAFE_SOURCE_PAGE.fullmatch(value)
+            or value.startswith("//")
+            or ".." in value
+            or "\\" in value
+            or CONTROL.search(value)
+        ):
+            raise ValueError("Invalid source page")
+        return value
+
     @model_validator(mode="after")
     def sized(self):
-        if len(self.data) > 40 or len(self.utm) > 8:
+        if len(self.data) > 40 or len(self.utm) > len(UTM_KEYS):
             raise ValueError("Too many fields")
-        if any(len(k) > 50 or len(v) > 120 for k, v in self.utm.items()):
-            raise ValueError("UTM parameters too long")
+        if any(not isinstance(k, str) or not KEY.fullmatch(k) for k in self.data):
+            raise ValueError("Invalid form field key")
+        if set(self.utm) - UTM_KEYS:
+            raise ValueError("Unexpected UTM parameter")
+        if any(
+            not isinstance(k, str)
+            or not isinstance(v, str)
+            or len(v) > 120
+            or CONTROL.search(k)
+            or CONTROL.search(v)
+            for k, v in self.utm.items()
+        ):
+            raise ValueError("UTM parameters are invalid")
+        for value in self.data.values():
+            if not isinstance(value, (str, bool)):
+                raise ValueError("Form values must be text or checkbox values")
+            if isinstance(value, str) and (len(value) > 5000 or CONTROL.search(value)):
+                raise ValueError("Form value contains prohibited or oversized content")
+        # Bound the parsed JSON object as well as each configured field. This limits
+        # memory/CPU amplification before validate_submission applies per-field rules.
+        encoded = json.dumps({"data": self.data, "source_page": self.source_page, "utm": self.utm}, ensure_ascii=False)
+        if len(encoded.encode("utf-8")) > 64 * 1024:
+            raise ValueError("Submission payload is too large")
         return self
 
 
 class InquiryPatch(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     status: Literal["new", "reviewed", "qualified", "follow_up", "converted", "closed", "spam"] | None = None
-    assigned_user_id: str | None = None
+    assigned_user_id: str | None = Field(default=None, max_length=80)
 
 
 class NoteCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     text: str = Field(min_length=2, max_length=5000)
+
+    @field_validator("text")
+    @classmethod
+    def safe_note(cls, value):
+        return _plain_text(value, "Note").strip()
 
 
 class AssessmentOption(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     id: str = Field(min_length=1, max_length=50)
     label: str = Field(min_length=1, max_length=160)
 
@@ -165,12 +242,23 @@ class AssessmentOption(BaseModel):
             raise ValueError("Invalid option ID")
         return v
 
+    @field_validator("label")
+    @classmethod
+    def safe_label(cls, v):
+        return _plain_text(v)
+
 
 class AssessmentQuestion(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     id: str = Field(min_length=1, max_length=50)
     prompt: str = Field(min_length=3, max_length=300)
     options: list[AssessmentOption] = Field(min_length=2, max_length=10)
     required: bool = True
+
+    @field_validator("prompt")
+    @classmethod
+    def safe_prompt(cls, v):
+        return _plain_text(v)
 
     @model_validator(mode="after")
     def distinct(self):
@@ -180,11 +268,18 @@ class AssessmentQuestion(BaseModel):
 
 
 class AssessmentResult(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     title: str = Field(min_length=3, max_length=150)
     description: str = Field(min_length=3, max_length=600)
 
+    @field_validator("title", "description")
+    @classmethod
+    def safe_copy(cls, v):
+        return _plain_text(v)
+
 
 class AssessmentCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     slug: str = Field(min_length=3, max_length=100)
     title: str = Field(min_length=3, max_length=200)
     intro: str = Field(default="", max_length=1500)
@@ -202,11 +297,16 @@ class AssessmentCreate(BaseModel):
             raise ValueError("Invalid slug")
         return v
 
+    @field_validator("title", "intro", "disclaimer", "cta_label")
+    @classmethod
+    def safe_copy(cls, v):
+        return _plain_text(v)
+
     @field_validator("cta_url")
     @classmethod
     def cta_link(cls, v):
-        if not (v.startswith("/") and not v.startswith("//")):
-            raise ValueError("CTA must be an internal path")
+        if not (v.startswith("/") and not v.startswith("//")) or ".." in v or "\\" in v or CONTROL.search(v):
+            raise ValueError("CTA must be a safe internal path")
         return v
 
     @model_validator(mode="after")
@@ -220,6 +320,7 @@ class AssessmentCreate(BaseModel):
 
 
 class AssessmentPatch(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     title: str | None = Field(default=None, min_length=3, max_length=200)
     intro: str | None = Field(default=None, max_length=1500)
     disclaimer: str | None = Field(default=None, min_length=20, max_length=600)
@@ -229,16 +330,29 @@ class AssessmentPatch(BaseModel):
     cta_url: str | None = None
     is_active: bool | None = None
 
+    @field_validator("title", "intro", "disclaimer", "cta_label")
+    @classmethod
+    def safe_copy(cls, v):
+        return _plain_text(v) if v is not None else v
+
     @field_validator("cta_url")
     @classmethod
     def cta_link(cls, v):
-        if v is not None and not (v.startswith("/") and not v.startswith("//")):
-            raise ValueError("CTA must be an internal path")
+        if v is not None and (not (v.startswith("/") and not v.startswith("//")) or ".." in v or "\\" in v or CONTROL.search(v)):
+            raise ValueError("CTA must be a safe internal path")
         return v
 
 
 class AssessmentAnswers(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     answers: dict[str, str] = Field(min_length=1, max_length=20)
+
+    @field_validator("answers")
+    @classmethod
+    def safe_answers(cls, value):
+        if any(not KEY.fullmatch(k) or not KEY.fullmatch(v) for k, v in value.items()):
+            raise ValueError("Assessment answers contain invalid identifiers")
+        return value
 
 
 def form_out(f: FormDefinition):
@@ -308,7 +422,7 @@ def validate_submission(fields: list[dict], payload: PublicFormSubmission):
             if field["required"] and not val:
                 raise HTTPException(422, f"{key}: required")
         else:
-            if not isinstance(val, str) or len(val) > field.get("max_length", 400):
+            if not isinstance(val, str) or len(val) > field.get("max_length", 400) or CONTROL.search(val):
                 raise HTTPException(422, f"{key}: invalid value or too long")
             val = val.strip()
             if field["required"] and not val:
@@ -461,6 +575,8 @@ def delete_form(form_id: str, actor: User = Depends(require_permission("content:
 
 @router.get("/public/forms/{slug}")
 def public_form(slug: str, db: Session = Depends(get_db)):
+    if not SLUG.fullmatch(slug):
+        raise HTTPException(404, "Form unavailable")
     f = db.query(FormDefinition).filter_by(slug=slug, is_active=True).first()
     if not f: raise HTTPException(404, "Form unavailable")
     return {"slug": f.slug, "title": f.title, "intro": f.intro,
@@ -469,6 +585,8 @@ def public_form(slug: str, db: Session = Depends(get_db)):
 
 @router.post("/public/forms/{slug}/submit", status_code=202)
 def submit_form(slug: str, payload: PublicFormSubmission, request: Request, db: Session = Depends(get_db)):
+    if not SLUG.fullmatch(slug):
+        raise HTTPException(404, "Form unavailable")
     f = db.query(FormDefinition).filter_by(slug=slug, is_active=True).first()
     if not f: raise HTTPException(404, "Form unavailable")
     if payload.website: return {"status": "accepted", "message": f.success_message}
@@ -632,6 +750,8 @@ def patch_assessment(assessment_id: str, payload: AssessmentPatch, actor: User =
 
 @router.get("/public/assessments/{slug}")
 def public_assessment(slug: str, db: Session = Depends(get_db)):
+    if not SLUG.fullmatch(slug):
+        raise HTTPException(404, "Assessment unavailable")
     a = db.query(AssessmentDefinition).filter_by(slug=slug, is_active=True).first()
     if not a: raise HTTPException(404, "Assessment unavailable")
     # Omit rules to avoid treating client-controlled data as authoritative.
@@ -642,6 +762,8 @@ def public_assessment(slug: str, db: Session = Depends(get_db)):
 
 @router.post("/public/assessments/{slug}/evaluate")
 def evaluate_assessment(slug: str, payload: AssessmentAnswers, db: Session = Depends(get_db)):
+    if not SLUG.fullmatch(slug):
+        raise HTTPException(404, "Assessment unavailable")
     a = db.query(AssessmentDefinition).filter_by(slug=slug, is_active=True).first()
     if not a: raise HTTPException(404, "Assessment unavailable")
     questions = json_out(a.questions_json, [])
@@ -663,6 +785,7 @@ def evaluate_assessment(slug: str, payload: AssessmentAnswers, db: Session = Dep
             "disclaimer": a.disclaimer, "cta_label": a.cta_label, "cta_url": a.cta_url,
             "note": "These suggestions are based only on your responses; no root cause has been verified."}
 
+
 @router.get("/leads/summary")
 def lead_summary(actor: User = Depends(require_permission("inquiries:read")), db: Session = Depends(get_db)):
     return {
@@ -679,7 +802,6 @@ def lead_email_health(request: Request, actor: User = Depends(require_permission
     return {"configured": bool(config.smtp_host and config.mail_from),
             "method": "smtp", "sender_configured": bool(config.mail_from),
             "smtp_host_configured": bool(config.smtp_host)}
-
 
 
 @router.delete("/inquiries/{inquiry_id}", dependencies=[Depends(require_csrf)])
