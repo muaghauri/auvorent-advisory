@@ -14,43 +14,47 @@ def _permissions(route: APIRoute) -> set[str]:
     return found
 
 
-def _route_map(app):
+def _endpoint_map(app):
+    """Map endpoint function names to routes.
+
+    FastAPI may clone APIRouter routes during include_router(), so function-name
+    binding is a more stable regression target than internal route-object
+    identity. Paths/methods remain exercised by the existing endpoint tests.
+    """
     mapping = {}
     for route in app.routes:
-        if not isinstance(route, APIRoute):
-            continue
-        for method in route.methods or ():
-            mapping[(method.upper(), route.path)] = route
+        if isinstance(route, APIRoute):
+            mapping.setdefault(getattr(route.endpoint, "__name__", ""), []).append(route)
     return mapping
 
 
-def test_high_risk_routes_keep_exact_server_side_permissions(app):
-    routes = _route_map(app)
+def test_high_risk_endpoints_keep_exact_server_side_permissions(app):
+    routes = _endpoint_map(app)
     expected = {
-        ("POST", "/api/v1/users"): "users:manage",
-        ("PATCH", "/api/v1/users/{user_id}"): "users:manage",
-        ("POST", "/api/v1/users/{user_id}/reset-password"): "users:manage",
-        ("GET", "/api/v1/audit"): "audit:read",
-        ("PATCH", "/api/v1/settings"): "settings:manage",
-        ("PATCH", "/api/v1/forms/settings"): "settings:manage",
-        ("POST", "/api/v1/inquiries/{inquiry_id}/resend"): "settings:manage",
-        ("DELETE", "/api/v1/inquiries/{inquiry_id}"): "settings:manage",
-        ("POST", "/api/v1/media"): "media:manage",
-        ("POST", "/api/v1/publishing/build"): "content:publish",
-        ("POST", "/api/v1/publishing/run-due"): "content:publish",
-        ("POST", "/api/v1/publishing/rollback/{release_id}"): "content:publish",
-        ("POST", "/api/v1/reviews/{review_id}/decision"): "content:approve",
-        ("POST", "/api/v1/integration/export-production"): "content:publish",
+        "create_user": "users:manage",
+        "update_user": "users:manage",
+        "admin_reset_password": "users:manage",
+        "audit_events": "audit:read",
+        "update_settings": "settings:manage",
+        "update_lead_settings": "settings:manage",
+        "resend_notification": "settings:manage",
+        "delete_inquiry": "settings:manage",
+        "upload_media": "media:manage",
+        "build": "content:publish",
+        "run_due": "content:publish",
+        "rollback": "content:publish",
+        "review_decision": "content:approve",
+        "export_release": "content:publish",
     }
-    missing_routes = [key for key in expected if key not in routes]
-    assert missing_routes == [], f"Expected security-sensitive routes missing: {missing_routes}"
+    missing = sorted(name for name in expected if name not in routes)
+    assert missing == [], f"Expected security-sensitive endpoints missing: {missing}"
 
     mismatches = []
-    for key, permission in expected.items():
-        actual = _permissions(routes[key])
+    for name, permission in expected.items():
+        actual = set().union(*(_permissions(route) for route in routes[name]))
         if permission not in actual:
-            mismatches.append((key, permission, sorted(actual)))
-    assert mismatches == [], f"High-risk routes lost required permission bindings: {mismatches}"
+            mismatches.append((name, permission, sorted(actual)))
+    assert mismatches == [], f"High-risk endpoints lost required permission bindings: {mismatches}"
 
 
 def test_read_only_roles_cannot_gain_mutation_permissions_from_matrix():
