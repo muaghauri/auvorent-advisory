@@ -96,7 +96,7 @@ def test_cloudflare_deploy_inputs_are_bounded():
 def test_cloudflare_deploy_environment_does_not_inherit_application_secrets(monkeypatch):
     monkeypatch.setenv("PATH", "/usr/bin")
     monkeypatch.setenv("HOME", "/tmp/home")
-    monkeypatch.setenv("CMS_DATABASE_URL", "postgresql://user:secret@example/db")
+    monkeypatch.setenv("CMS_DATABASE_URL", "postgresql://example.invalid/auvorent")
     monkeypatch.setenv("R2_SECRET_ACCESS_KEY", "r2-secret")
     monkeypatch.setenv("CMS_SMTP_PASSWORD", "mail-secret")
     monkeypatch.setenv("CMS_SECRET_KEY", "session-secret")
