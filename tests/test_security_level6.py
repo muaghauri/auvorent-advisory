@@ -3,7 +3,7 @@ import json
 import pytest
 
 from backend.app import cloudflare_pages, config, storage
-from backend.app.security import _sanitize_audit_value, _valid_browser_token
+from backend.app.security import _sanitize_audit_value, _valid_browser_token, sanitize_audit_detail
 
 
 def test_weak_secret_rejects_predictable_values():
@@ -43,6 +43,21 @@ def test_audit_redaction_is_recursive_and_bounded():
     assert "Bearer abc" not in dumped
     assert clean["nested"]["ok"] == "visible"
     assert len(clean["long"]) == 2000
+
+
+def test_legacy_audit_detail_is_redacted_again_on_read():
+    raw = json.dumps({
+        "api_key": "legacy-secret",
+        "nested": {"authorization": "Bearer old-token", "safe": "visible"},
+        "database_url": "postgresql://example.invalid/legacy",
+    })
+    clean = json.loads(sanitize_audit_detail(raw))
+    assert clean["api_key"] == "[REDACTED]"
+    assert clean["nested"]["authorization"] == "[REDACTED]"
+    assert clean["nested"]["safe"] == "visible"
+    assert clean["database_url"] == "[REDACTED]"
+    assert sanitize_audit_detail("not-json") == "{}"
+    assert sanitize_audit_detail(json.dumps(["unexpected"])) == "{}"
 
 
 def test_r2_keys_are_restricted():
