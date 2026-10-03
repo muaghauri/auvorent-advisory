@@ -26,7 +26,8 @@ from .phase5 import router as phase5_router
 from .phase6 import router as phase6_router
 from .security import (
     ROLES, audit, create_session, current_user, fingerprint_token,
-    get_db, hash_password, require_csrf, require_permission, user_out, verify_password,
+    get_db, hash_password, require_csrf, require_permission, sanitize_audit_detail,
+    user_out, verify_password,
 )
 
 FRONTEND = Path(__file__).resolve().parents[2] / "frontend"
@@ -312,7 +313,7 @@ def create_app(settings: Settings | None = None, *, create_schema: bool | None =
         rows = db.query(AuditLog).order_by(AuditLog.id.desc()).offset(offset).limit(limit).all()
         return {"items":[{"id":row.id,"action":row.action,"actor_user_id":row.actor_user_id,
                            "target_type":row.target_type,"target_id":row.target_id,
-                           "detail":row.detail,"created_at":row.created_at.isoformat()+"Z"} for row in rows],
+                           "detail":sanitize_audit_detail(row.detail),"created_at":row.created_at.isoformat()+"Z"} for row in rows],
                 "total":db.query(func.count(AuditLog.id)).scalar(),"limit":limit,"offset":offset}
 
     return app
