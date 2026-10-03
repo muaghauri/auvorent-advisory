@@ -4,6 +4,7 @@ import pytest
 from fastapi.routing import APIRoute
 from pydantic import ValidationError
 
+from backend.app.phase6 import VisualEdit
 from backend.app.phase6_renderer import clean_fragment, safe_local_url
 from backend.app.schemas import (
     CreatePageInput,
@@ -64,6 +65,23 @@ def test_settings_batch_and_values_are_bounded():
         UpdateSettingsInput(values={f"k{i}": "v" for i in range(26)})
     with pytest.raises(ValidationError):
         UpdateSettingsInput(values={"brand.tagline": "x" * (33 * 1024)})
+
+
+def test_visual_editor_rejects_control_characters_and_invalid_field_keys():
+    VisualEdit(text_overrides={"text_0": "Safe editorial copy"}, link_overrides={"link_0": "/contact/"})
+    with pytest.raises(ValidationError):
+        VisualEdit(text_overrides={"text_0": "hello\x00world"})
+    with pytest.raises(ValidationError):
+        VisualEdit(alt_overrides={"image_0": "alt\x07text"})
+    with pytest.raises(ValidationError):
+        VisualEdit(text_overrides={"../../text": "bad"})
+    with pytest.raises(ValidationError):
+        VisualEdit(link_overrides={"link_0": "javascript:alert(1)"})
+
+
+def test_visual_editor_payload_is_bounded():
+    with pytest.raises(ValidationError):
+        VisualEdit(text_overrides={f"text_{i}": "x" * 2000 for i in range(150)})
 
 
 def test_renderer_removes_executable_html_and_unsafe_urls():
@@ -144,7 +162,7 @@ def test_every_nonpublic_api_route_is_bound_to_authentication(app):
 
 def test_public_lead_frontend_does_not_use_raw_html_sinks():
     root = Path(__file__).resolve().parents[1]
-    for relative in ("seed/v6_assets/cms-public.js", "frontend/assets/phase4.js"):
+    for relative in ("seed/v6_assets/cms-public.js", "frontend/assets/phase4.js", "frontend/assets/phase6.js"):
         source = (root / relative).read_text(encoding="utf-8")
         assert ".innerHTML" not in source
         assert "insertAdjacentHTML" not in source
