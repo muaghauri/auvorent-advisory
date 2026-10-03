@@ -86,6 +86,27 @@ def test_cloudflare_deploy_inputs_are_bounded():
         cloudflare_pages._validate_deploy_inputs("auvorent-site", "main", "bad\nmessage", 300)
 
 
+def test_cloudflare_deploy_environment_does_not_inherit_application_secrets(monkeypatch):
+    monkeypatch.setenv("PATH", "/usr/bin")
+    monkeypatch.setenv("HOME", "/tmp/home")
+    monkeypatch.setenv("CMS_DATABASE_URL", "postgresql://user:secret@example/db")
+    monkeypatch.setenv("R2_SECRET_ACCESS_KEY", "r2-secret")
+    monkeypatch.setenv("CMS_SMTP_PASSWORD", "mail-secret")
+    monkeypatch.setenv("CMS_SECRET_KEY", "session-secret")
+
+    env = cloudflare_pages._deployment_env("a" * 32, "cloudflare-token-value-12345")
+
+    assert env["PATH"] == "/usr/bin"
+    assert env["HOME"] == "/tmp/home"
+    assert env["CLOUDFLARE_ACCOUNT_ID"] == "a" * 32
+    assert env["CLOUDFLARE_API_TOKEN"] == "cloudflare-token-value-12345"
+    assert env["CI"] == "true"
+    assert "CMS_DATABASE_URL" not in env
+    assert "R2_SECRET_ACCESS_KEY" not in env
+    assert "CMS_SMTP_PASSWORD" not in env
+    assert "CMS_SECRET_KEY" not in env
+
+
 def test_cloudflare_redaction_hides_token_and_authorization():
     token = "top-secret-token"
     raw = f"authorization: Bearer abc123 api_token={token} {token}"
