@@ -72,6 +72,24 @@ def test_public_form_rejects_oversized_values_before_database_work():
         PublicFormSubmission(data={"message": "x" * 5001}, consent=True, source_page="/contact/")
 
 
+def test_public_api_rejects_wrong_content_type_before_route_processing(client):
+    response = client.post(
+        "/api/v1/public/assessments/nonexistent/evaluate",
+        content="answers=priority",
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+    )
+    assert response.status_code == 415
+
+
+def test_public_api_rejects_oversized_declared_request_before_json_parsing(client):
+    response = client.post(
+        "/api/v1/public/assessments/nonexistent/evaluate",
+        content=b"x" * (129 * 1024),
+        headers={"Content-Type": "application/json"},
+    )
+    assert response.status_code == 413
+
+
 def test_form_builder_rejects_extra_fields_and_control_chars():
     field = FormField(id="name", label="Your name", type="text", required=True)
     form = FormCreate(slug="strategy-call", title="Strategy call", fields=[field])
