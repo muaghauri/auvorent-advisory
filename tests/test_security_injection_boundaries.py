@@ -4,7 +4,11 @@ import pytest
 from fastapi.routing import APIRoute
 from pydantic import ValidationError
 
-from backend.app.phase6 import VisualEdit
+from backend.app.phase2 import router as phase2_router
+from backend.app.phase3 import router as phase3_router
+from backend.app.phase4 import router as phase4_router
+from backend.app.phase5 import router as phase5_router
+from backend.app.phase6 import VisualEdit, router as phase6_router
 from backend.app.phase6_renderer import clean_fragment, safe_local_url
 from backend.app.schemas import (
     CreatePageInput,
@@ -188,11 +192,14 @@ def test_sensitive_handlers_keep_exact_server_side_permissions(app):
         "rollback": "content:publish",
         "export_release": "content:publish",
     }
-    routes_by_name = {
-        route.name: route
-        for route in app.routes
-        if isinstance(route, APIRoute)
-    }
+    source_routes=[]
+    for source_router in (phase2_router, phase3_router, phase4_router, phase5_router, phase6_router):
+        source_routes.extend(route for route in source_router.routes if isinstance(route, APIRoute))
+    # Main-app handlers are defined directly on the FastAPI instance; phase
+    # handlers are checked on their source routers so a framework clone cannot
+    # strip the inspectable permission marker used only by this regression test.
+    source_routes.extend(route for route in app.routes if isinstance(route, APIRoute))
+    routes_by_name={route.name:route for route in source_routes}
     missing=[]
     incorrect=[]
     for name, permission in expected.items():
