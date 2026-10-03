@@ -1,78 +1,57 @@
-import inspect
-
-from fastapi.params import Depends
-
-from backend.app.main import admin_reset_password, audit_events, create_user, update_user
-from backend.app.phase2 import update_settings
-from backend.app.phase3 import upload_media
-from backend.app.phase4 import delete_inquiry, resend_notification, update_lead_settings
-from backend.app.phase5 import review_decision
-from backend.app.phase6 import export_release
+from backend.app.phase2 import router as phase2_router
+from backend.app.phase3 import router as phase3_router
+from backend.app.phase4 import router as phase4_router
+from backend.app.phase5 import router as phase5_router
+from backend.app.phase6 import router as phase6_router
 
 
-def _required_permissions(endpoint) -> set[str]:
-    """Inspect the server-side Depends bindings declared by an endpoint.
-
-    This intentionally validates the source-level security contract rather than
-    FastAPI's internal cloned route graph, which changes across framework
-    versions. Endpoint reachability is already covered by the phase integration
-    tests.
-    """
+def _required_permissions(route) -> set[str]:
     found = set()
-    for parameter in inspect.signature(endpoint).parameters.values():
-        default = parameter.default
-        if not isinstance(default, Depends):
-            continue
-        dependency = default.dependency
-        permission = getattr(dependency, "required_permission", None)
+    stack = list(route.dependant.dependencies)
+    while stack:
+        dep = stack.pop()
+        permission = getattr(dep.call, "required_permission", None)
         if permission:
             found.add(permission)
+        stack.extend(dep.dependencies)
     return found
 
 
-def _router_endpoint(router, *, path: str, method: str):
+def _route(source, *, path: str, method: str):
     matches = [
-        route.endpoint
-        for route in router.routes
+        route
+        for route in source.routes
         if getattr(route, "path", None) == path and method.upper() in (getattr(route, "methods", None) or set())
     ]
-    assert len(matches) == 1, f"Expected exactly one {method} {path} endpoint, got {len(matches)}"
+    assert len(matches) == 1, f"Expected exactly one {method} {path} route, got {len(matches)}"
     return matches[0]
 
 
-def test_high_risk_endpoints_keep_exact_server_side_permissions():
-    from backend.app.phase5 import router as phase5_router
-
-    # Phase 5 publishing functions are resolved by path because their internal
-    # function names are intentionally free to evolve while the API contract is
-    # stable.
-    build = _router_endpoint(phase5_router, path="/api/v1/publishing/build", method="POST")
-    run_due = _router_endpoint(phase5_router, path="/api/v1/publishing/run-due", method="POST")
-    rollback = _router_endpoint(phase5_router, path="/api/v1/publishing/rollback/{release_id}", method="POST")
-
-    expected = {
-        create_user: "users:manage",
-        update_user: "users:manage",
-        admin_reset_password: "users:manage",
-        audit_events: "audit:read",
-        update_settings: "settings:manage",
-        update_lead_settings: "settings:manage",
-        resend_notification: "settings:manage",
-        delete_inquiry: "settings:manage",
-        upload_media: "media:manage",
-        build: "content:publish",
-        run_due: "content:publish",
-        rollback: "content:publish",
-        review_decision: "content:approve",
-        export_release: "content:publish",
-    }
+def test_high_risk_endpoints_keep_exact_server_side_permissions(app):
+    expected = [
+        (app, "POST", "/api/v1/users", "users:manage"),
+        (app, "PATCH", "/api/v1/users/{user_id}", "users:manage"),
+        (app, "POST", "/api/v1/users/{user_id}/reset-password", "users:manage"),
+        (app, "GET", "/api/v1/audit", "audit:read"),
+        (phase2_router, "PATCH", "/api/v1/settings", "settings:manage"),
+        (phase4_router, "PATCH", "/api/v1/forms/settings", "settings:manage"),
+        (phase4_router, "POST", "/api/v1/inquiries/{inquiry_id}/resend", "settings:manage"),
+        (phase4_router, "DELETE", "/api/v1/inquiries/{inquiry_id}", "settings:manage"),
+        (phase3_router, "POST", "/api/v1/media", "media:manage"),
+        (phase5_router, "POST", "/api/v1/publishing/build", "content:publish"),
+        (phase5_router, "POST", "/api/v1/publishing/run-due", "content:publish"),
+        (phase5_router, "POST", "/api/v1/publishing/rollback/{release_id}", "content:publish"),
+        (phase5_router, "POST", "/api/v1/reviews/{review_id}/decision", "content:approve"),
+        (phase6_router, "POST", "/api/v1/integration/export-production", "content:publish"),
+    ]
 
     mismatches = []
-    for endpoint, permission in expected.items():
-        actual = _required_permissions(endpoint)
+    for source, method, path, permission in expected:
+        route = _route(source, path=path, method=method)
+        actual = _required_permissions(route)
         if permission not in actual:
-            mismatches.append((endpoint.__name__, permission, sorted(actual)))
-    assert mismatches == [], f"High-risk endpoints lost required permission bindings: {mismatches}"
+            mismatches.append(((method, path), permission, sorted(actual)))
+    assert mismatches == [], f"High-risk routes lost required permission bindings: {mismatches}"
 
 
 def test_read_only_roles_cannot_gain_mutation_permissions_from_matrix():
