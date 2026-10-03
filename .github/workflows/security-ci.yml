@@ -52,6 +52,21 @@ jobs:
           fi
           echo 'No prohibited frontend injection sinks detected.'
 
+      - name: Tracked secret leak check
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=$(git ls-files ':!:*.md' ':!:*.lock' ':!:seed/*' ':!:seed/**/*')
+          if [ -z "$files" ]; then
+            exit 0
+          fi
+          patterns='BEGIN (RSA|OPENSSH|EC|DSA) PRIVATE KEY|postgres(ql)?://[^[:space:]/:]+:[^[:space:]@]+@|(^|[^A-Za-z0-9])AKIA[0-9A-Z]{16}([^A-Za-z0-9]|$)|(^|[^A-Za-z0-9])re_[A-Za-z0-9_-]{20,}([^A-Za-z0-9]|$)'
+          if printf '%s\n' "$files" | xargs -r grep -nEI "$patterns"; then
+            echo 'Potential credential material is tracked in Git. Remove it and rotate the credential before merge.'
+            exit 1
+          fi
+          echo 'No high-confidence tracked credential patterns detected.'
+
       - name: Static security scan — blocking medium/high
         run: bandit -q -r backend/app -x backend/alembic -ll
 
