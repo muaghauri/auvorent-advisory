@@ -19,7 +19,7 @@ from sqlalchemy.orm import Session
 
 from .cloudflare_pages import CloudflarePagesError, deploy_pages
 from .models import MediaAsset, Page, PageSection, utcnow
-from .phase5 import PUBLISH_LOCK, active_release, canonical_base, reset_approval
+from .phase5 import PUBLISH_LOCK, _assert_release_tree_safe, active_release, canonical_base, reset_approval
 from .phase6_renderer import safe_local_url, section_fields
 from .security import audit, get_db, require_csrf, require_permission
 
@@ -224,10 +224,14 @@ def export_release(request:Request,actor=Depends(require_permission('content:pub
     with PUBLISH_LOCK:
         active=active_release(root)
         if not active:raise HTTPException(409,'No staging release')
+        try:_assert_release_tree_safe(active)
+        except RuntimeError as exc:raise HTTPException(409,'Staging release integrity check failed') from exc
         exports=root/'exports';exports.mkdir(exist_ok=True,parents=True)
         out=exports/('production-'+uuid.uuid4().hex)
         try:
-            shutil.copytree(active,out)
+            shutil.copytree(active,out,symlinks=False)
+            try:_assert_release_tree_safe(out)
+            except RuntimeError as exc:raise HTTPException(409,'Production export integrity check failed') from exc
             # Only approved, explicitly indexable pages carry a planned index directive.
             for page in out.rglob('index.html'):
                 soup=BeautifulSoup(page.read_text(encoding='utf8'),'html.parser')
@@ -256,11 +260,15 @@ def export_release(request:Request,actor=Depends(require_permission('content:pub
             db.commit()
 
             try:
+                # Recheck immediately before the provider process sees the tree.
+                _assert_release_tree_safe(out)
                 deployment = deploy_pages(
                     out,
                     branch='main',
                     commit_message=f'CMS production release {active.name}',
                 )
+            except RuntimeError as exc:
+                raise HTTPException(409,'Production export integrity check failed') from exc
             except CloudflarePagesError as exc:
                 audit(
                     db,
