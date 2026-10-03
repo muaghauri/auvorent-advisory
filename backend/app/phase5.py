@@ -22,7 +22,7 @@ from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse, FileResponse
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
 from sqlalchemy.orm import Session
 from .models import (Page, PageSection, CollectionEntry, MediaAsset, NavigationItem, SiteSetting,
                      SeoRecord, RedirectRule, EditorialReview, PrivatePreview, PublishDeployment,
@@ -31,18 +31,21 @@ from .security import audit, get_db, require_csrf, require_permission
 
 router=APIRouter(prefix='/api/v1',tags=['SEO, Review & Publishing'])
 ALLOWED_TYPES={'page','service','industry','insight','author','case_study','team_member'}
+PUBLIC_COLLECTION_TYPES={'service','industry','insight'}
 SCHEMAS={'WebPage','Article','Service','Organization','AboutPage','ContactPage','FAQPage'}
 ROOT=Path(__file__).resolve().parents[2]
 SEED=(ROOT/'seed'/'v6_page_content.json')
 PUBLISH_LOCK=threading.RLock()
 _PREVIEW_TOKEN_RE=re.compile(r'^[A-Za-z0-9_-]{32,128}$')
 _RELEASE_ID_RE=re.compile(r'^[0-9a-f]{32}$')
+_ROUTE_RE=re.compile(r'^/[A-Za-z0-9/_-]*/?$')
 _PUBLIC_REPORT_KEYS={'release_id','published_count','skipped_non_public_collections','sitemap_url_count','staging_only','restored_release_id'}
 _SAFE_FAILURE_PREFIXES=(
     'Nothing approved to publish',
     'Approval stale or missing for ',
     'SEO blocks ',
     'Generated HTML missing critical SEO elements',
+    'Managed release contains unsupported symbolic links',
 )
 
 
@@ -126,7 +129,7 @@ def entity_issues(db,kind,id):
     canonical=meta['canonical_override']
     if canonical:
         p=urlparse(canonical)
-        if p.scheme!='https' or not p.hostname or p.username or p.fragment:
+        if p.scheme!='https' or not p.hostname or p.username or p.password or p.fragment:
             problems.append({'level':'error','code':'canonical','message':'Canonical URL must be a full HTTPS URL without credentials or fragment.'})
     if kind=='page':
         headings=[json.loads(s.content_json or '{}').get('heading','').strip() for s in row.sections if s.is_enabled]
@@ -343,7 +346,9 @@ def view_preview(token:str,actor:User=Depends(require_permission('content:read')
     if not _PREVIEW_TOKEN_RE.fullmatch(token or ''):raise HTTPException(404,'Preview expired')
     row=db.query(PrivatePreview).filter_by(token_hash=hashlib.sha256(token.encode()).hexdigest()).first()
     if not row or row.expires_at < utcnow():raise HTTPException(404,'Preview expired')
-    snap=json.loads(row.snapshot_json)
+    try:snap=json.loads(row.snapshot_json)
+    except (TypeError,json.JSONDecodeError):raise HTTPException(404,'Preview expired')
+    if not isinstance(snap,dict):raise HTTPException(404,'Preview expired')
     if row.entity_type=='page':
         from .phase6_renderer import integrate_page
         try: base=canonical_base(db)
@@ -497,12 +502,21 @@ def active_release(root:Path):
     return target if target.is_dir() else None
 
 
+def _assert_release_tree_safe(root:Path):
+    root=root.resolve()
+    if not root.is_dir():raise RuntimeError('Invalid managed release')
+    for item in root.rglob('*'):
+        if item.is_symlink():
+            raise RuntimeError('Managed release contains unsupported symbolic links')
+
+
 def switch_release(root:Path,target:Path):
     releases=(root/'releases').resolve()
     if target.is_symlink():raise RuntimeError('Invalid managed release')
     resolved=target.resolve()
     if resolved.parent!=releases or not resolved.is_dir():
         raise RuntimeError('Invalid managed release')
+    _assert_release_tree_safe(resolved)
     link=root/('.next-'+uuid.uuid4().hex)
     link.symlink_to(resolved,target_is_directory=True)
     os.replace(link,root/'current')
@@ -516,6 +530,65 @@ def _valid_release_manifest(target:Path,release_id:str):
     return isinstance(data,dict) and data.get('release_id')==release_id and data.get('environment')=='local_staging'
 
 
+def _route_file(root:Path,route:str):
+    if not isinstance(route,str) or not route.startswith('/') or route.startswith('//') or '..' in route or '\\' in route or not _ROUTE_RE.fullmatch(route):
+        raise ValueError('Invalid managed route')
+    candidate=(root/'index.html') if route=='/' else (root/route.lstrip('/')/'index.html')
+    resolved_parent=candidate.parent.resolve()
+    if not resolved_parent.is_relative_to(root.resolve()):raise ValueError('Invalid managed route')
+    return candidate
+
+
+def _manifest_items(release:Path|None):
+    if not release:return []
+    manifest=release/'manifest.json'
+    try:data=json.loads(manifest.read_text(encoding='utf-8'))
+    except (OSError,TypeError,json.JSONDecodeError):return []
+    items=data.get('published',[]) if isinstance(data,dict) else []
+    return items if isinstance(items,list) else []
+
+
+def _prune_nonpublic_routes(db:Session,target:Path,old:Path|None):
+    public_status={'published','approved'}
+    rows=[('page',p) for p in db.query(Page).all()]+[(c.kind,c) for c in db.query(CollectionEntry).all() if c.kind in PUBLIC_COLLECTION_TYPES]
+    by_key={(kind,row.id):row for kind,row in rows}
+    for kind,row in rows:
+        if row.status not in public_status:
+            try:_route_file(target,entity_route(row,kind)).unlink(missing_ok=True)
+            except ValueError:raise RuntimeError('Invalid managed route')
+    for item in _manifest_items(old):
+        if not isinstance(item,dict):continue
+        kind=item.get('type');ident=item.get('id');route=item.get('route')
+        if kind!='page' and kind not in PUBLIC_COLLECTION_TYPES:continue
+        row=by_key.get((kind,ident))
+        keep=bool(row and row.status in public_status and entity_route(row,kind)==route)
+        if not keep:
+            try:_route_file(target,route).unlink(missing_ok=True)
+            except ValueError:raise RuntimeError('Invalid managed route')
+    # V6 seed pages are CMS-managed. A deleted/unpublished seed page must not
+    # silently reappear just because the immutable baseline contains its HTML.
+    try:seed_routes={p.get('route') for p in json.loads(SEED.read_text(encoding='utf-8')).get('pages',[]) if isinstance(p,dict)}
+    except (OSError,TypeError,json.JSONDecodeError):seed_routes=set()
+    page_by_route={p.route:p for p in db.query(Page).all()}
+    for route in seed_routes:
+        row=page_by_route.get(route)
+        if not row or row.status not in public_status:
+            try:_route_file(target,route).unlink(missing_ok=True)
+            except ValueError:raise RuntimeError('Invalid managed route')
+
+
+def _managed_manifest_entries(db:Session,target:Path):
+    result=[]
+    rows=[('page',p) for p in db.query(Page).all()]+[(c.kind,c) for c in db.query(CollectionEntry).all() if c.kind in PUBLIC_COLLECTION_TYPES]
+    for kind,row in rows:
+        if row.status not in {'published','approved'}:continue
+        route=entity_route(row,kind)
+        try:exists=_route_file(target,route).is_file()
+        except ValueError:raise RuntimeError('Invalid managed route')
+        if exists:result.append({'type':kind,'id':row.id,'route':route})
+    return result
+
+
 def compile_release(db:Session,root:Path,job:PublishDeployment,media_root:Path|None=None):
     """Build immutable release; pointer changes only after every page passes validation."""
     root.mkdir(parents=True,exist_ok=True)
@@ -524,15 +597,20 @@ def compile_release(db:Session,root:Path,job:PublishDeployment,media_root:Path|N
     release_id=uuid.uuid4().hex
     target=releases/release_id
     base=canonical_base(db)
-    if old:shutil.copytree(old,target,symlinks=False)
-    else:
-        from .phase6_renderer import copy_baseline
-        copy_baseline(target)
     try:
+        if old:
+            _assert_release_tree_safe(old)
+            shutil.copytree(old,target,symlinks=False)
+        else:
+            from .phase6_renderer import copy_baseline
+            copy_baseline(target)
+        _assert_release_tree_safe(target)
+        _prune_nonpublic_routes(db,target,old)
         assets=target/'assets';assets.mkdir(exist_ok=True)
         bundled=ROOT/'seed'/'v6_assets'
         for source in bundled.rglob('*'):
             if source.is_file():
+                if source.is_symlink():raise RuntimeError('Managed release contains unsupported symbolic links')
                 destination=assets/source.relative_to(bundled)
                 destination.parent.mkdir(parents=True,exist_ok=True)
                 shutil.copy2(source,destination)
@@ -543,9 +621,10 @@ def compile_release(db:Session,root:Path,job:PublishDeployment,media_root:Path|N
             if not review or review.content_hash!=fingerprint(db,kind,row.id):
                 raise ValueError(f'Approval stale or missing for {kind}:{row.id}')
             val=entity_issues(db,kind,row.id)
-            if val['index_requested'] and val['errors']:
+            security_errors=[x for x in val['issues'] if x['level']=='error' and x['code'] in {'canonical','image_missing'}]
+            if (val['index_requested'] and val['errors']) or security_errors:
                 raise ValueError(f'SEO blocks {kind}:{row.id}: '+', '.join(x['code'] for x in val['issues'] if x['level']=='error'))
-            if kind!='page' and kind not in ('service','industry','insight'):
+            if kind!='page' and kind not in PUBLIC_COLLECTION_TYPES:
                 skipped.append(kind+':'+row.id);continue
             snap=entity_payload(db,kind,row.id)
             og_id=snap['seo'].get('og_image_media_id')
@@ -558,7 +637,7 @@ def compile_release(db:Session,root:Path,job:PublishDeployment,media_root:Path|N
                     shutil.copy2(media_source,media_dest)
                     snap['og_image_url']=base+'/assets/media/'+asset.storage_name
             route=entity_route(row,kind)
-            outfile=target/route.lstrip('/')/'index.html' if route!='/' else target/'index.html'
+            outfile=_route_file(target,route)
             outfile.parent.mkdir(parents=True,exist_ok=True)
             if kind=='page':
                 from .phase6_renderer import integrate_page
@@ -577,10 +656,10 @@ def compile_release(db:Session,root:Path,job:PublishDeployment,media_root:Path|N
         write_site_bridge(target,_env.environ.get('CMS_PUBLIC_API_BASE','http://127.0.0.1:8900'))
         # Build sitemap from the current release and indexable CMS records only.
         urls=[]
-        for kind,row in [('page',p) for p in db.query(Page).all()]+[(c.kind,c) for c in db.query(CollectionEntry).filter(CollectionEntry.kind.in_(['service','industry','insight'])).all()]:
+        for kind,row in [('page',p) for p in db.query(Page).all()]+[(c.kind,c) for c in db.query(CollectionEntry).filter(CollectionEntry.kind.in_(list(PUBLIC_COLLECTION_TYPES))).all()]:
             if row.status not in ('published','approved'):continue
             route=entity_route(row,kind)
-            filepath=target/route.lstrip('/')/'index.html' if route!='/' else target/'index.html'
+            filepath=_route_file(target,route)
             if not filepath.exists():continue
             meta=effective_seo(row,seo_for(db,kind,row.id))
             if meta['robots_index']:urls.append(meta['canonical_override'] or base+route)
@@ -590,16 +669,18 @@ def compile_release(db:Session,root:Path,job:PublishDeployment,media_root:Path|N
         (target/'robots.txt').write_text('User-agent: *\nDisallow: /\n',encoding='utf-8')
         redirects=[r for r in db.query(RedirectRule).all() if r.is_active]
         (target/'_redirects').write_text(''.join(f'{r.old_path} {r.new_path} {r.status_code}\n' for r in redirects),encoding='utf-8')
+        managed=_managed_manifest_entries(db,target)
         (target/'manifest.json').write_text(json_safe({'release_id':release_id,'created_at':utcnow().isoformat()+'Z',
-             'environment':'local_staging','published':[{'type':a,'id':b,'route':c} for a,b,c,_ in approved],
+             'environment':'local_staging','published':managed,
              'robots':'staging_disallow_all','base':base}),encoding='utf-8')
         # Test output exists and expected metadata appears before changing current.
         for kind,id,route,_ in approved:
-            filepath=target/route.lstrip('/')/'index.html' if route!='/' else target/'index.html'
+            filepath=_route_file(target,route)
             source=filepath.read_text(encoding='utf-8')
             dom=BeautifulSoup(source,'html.parser')
             if not dom.find('link',rel='canonical') or not dom.title or not dom.find('meta',attrs={'name':'description'}):
                 raise ValueError('Generated HTML missing critical SEO elements')
+        _assert_release_tree_safe(target)
         switch_release(root,target)
         for kind,id,route,review_id in approved:
             entity(db,kind,id).status='published'
@@ -675,7 +756,7 @@ def rollback(release_id:str,request:Request,actor:User=Depends(require_permissio
         previous=active_release(root)
         try:
             switch_release(root,target)
-            job=PublishDeployment(id=str(uuid.uuid4()),release_id=release_id,status='rolled_back',environment='local_staging',
+            job=PublishDeployment(id=str(uuid.uuid4()),release_id=None,status='rolled_back',environment='local_staging',
                  requested_by=actor.id,report_json=json_safe({'restored_release_id':release_id,'staging_only':True}),completed_at=utcnow())
             db.add(job);audit(db,'publish.rolled_back',actor=actor.id,target_type='deployment',target_id=job.id,release=release_id)
             db.commit()
@@ -707,70 +788,107 @@ def list_versions(kind:str,entity_id:str,actor:User=Depends(require_permission('
         'actor_user_id':r.actor_user_id} for r in rows]}
 
 
+def _revision_snapshot(row):
+    try:snap=json.loads(row.snapshot_json)
+    except (TypeError,json.JSONDecodeError):raise HTTPException(422,'Revision snapshot is invalid')
+    if not isinstance(snap,dict):raise HTTPException(422,'Revision snapshot is invalid')
+    return snap
+
+
+def _validated_model(model,data):
+    try:return model(**data)
+    except ValidationError:raise HTTPException(422,'Revision failed current safety validation')
+
+
+def _valid_revision_uuid(value):
+    try:return str(uuid.UUID(str(value)))==str(value).lower()
+    except (ValueError,TypeError,AttributeError):return False
+
+
 @router.post('/publishing/versions/{revision_id}/restore',dependencies=[Depends(require_csrf)])
 def restore_version(revision_id:int,actor:User=Depends(require_permission('content:edit')),db:Session=Depends(get_db)):
     row=db.get(ContentRevision,revision_id)
     if not row or row.entity_type not in ALLOWED_TYPES|{'seo','section'}:
         raise HTTPException(404,'Supported content revision not found')
-    snap=json.loads(row.snapshot_json)
+    snap=_revision_snapshot(row)
     if row.entity_type=='section':
         section=db.get(PageSection,row.entity_id)
         if not section:raise HTTPException(404,'Section no longer exists')
         from .phase2 import _section_out
+        from .schemas import UpdateSectionInput
+        selected={key:snap[key] for key in ('section_key','section_type','position','is_enabled','content') if key in snap}
+        changes=_validated_model(UpdateSectionInput,selected).model_dump(exclude_unset=True)
         db.add(ContentRevision(entity_type='section',entity_id=section.id,
             snapshot_json=json_safe(_section_out(section)),actor_user_id=actor.id))
-        for field in ('section_key','section_type','position','is_enabled'):
-            if field in snap:setattr(section,field,snap[field])
-        if 'content' in snap:section.content_json=json_safe(snap['content'])
+        if 'content' in changes:section.content_json=json_safe(changes.pop('content'))
+        for field,value in changes.items():setattr(section,field,value)
         kind='page';target=entity(db,kind,section.page_id)
     elif row.entity_type=='seo':
         target=db.get(Page,row.entity_id) or db.get(CollectionEntry,row.entity_id)
         if not target:raise HTTPException(404,'Content no longer exists')
         kind='page' if isinstance(target,Page) else target.kind
+        before=effective_seo(target,seo_for(db,kind,target.id))
+        candidate={key:snap.get(key,before[key]) for key in ('seo_title','meta_description','canonical_override','robots_index','robots_follow','og_title',
+                    'og_description','og_image_media_id','schema_type','breadcrumb_title')}
+        validated=_validated_model(SeoPatch,candidate)
+        if validated.og_image_media_id and not db.get(MediaAsset,validated.og_image_media_id):raise HTTPException(422,'Revision references unavailable media')
         record=seo_for(db,kind,target.id)
         if not record:
             record=SeoRecord(id=str(uuid.uuid4()),entity_type=kind,entity_id=target.id)
             db.add(record)
-        before=effective_seo(target,record)
         db.add(ContentRevision(entity_type='seo',entity_id=target.id,snapshot_json=json_safe(before),actor_user_id=actor.id))
-        for key in ('seo_title','meta_description','canonical_override','robots_index','robots_follow','og_title',
-                    'og_description','og_image_media_id','schema_type','breadcrumb_title'):
-            if key in snap:setattr(record,key,snap[key])
+        for key,value in validated.model_dump().items():setattr(record,key,value)
         target.seo_title=record.seo_title;target.meta_description=record.meta_description
         if kind=='page':target.is_indexable=record.robots_index
     else:
         kind=row.entity_type;target=entity(db,kind,row.entity_id)
         if kind=='page':
             from .phase2 import _page_out, _norm_route
+            from .schemas import UpdatePageInput, UpdateSectionInput
+            selected={key:snap[key] for key in ('route','slug','title','template','show_in_navigation','is_indexable','seo_title','meta_description') if key in snap}
+            changes=_validated_model(UpdatePageInput,selected).model_dump(exclude_unset=True)
             db.add(ContentRevision(entity_type=kind,entity_id=target.id,snapshot_json=json_safe(_page_out(target,True)),actor_user_id=actor.id))
-            new_route=_norm_route(snap['route'])
-            occupied=db.query(Page).filter(Page.route==new_route,Page.id!=target.id).first()
-            if occupied:raise HTTPException(409,'Restoring this version would duplicate an existing page route')
-            for field in ('route','slug','title','template','show_in_navigation','is_indexable','seo_title','meta_description'):
-                if field in snap:setattr(target,field,snap[field])
+            if 'route' in changes:
+                new_route=_norm_route(changes['route'])
+                occupied=db.query(Page).filter(Page.route==new_route,Page.id!=target.id).first()
+                if occupied:raise HTTPException(409,'Restoring this version would duplicate an existing page route')
+                changes['route']=new_route
+            for field,value in changes.items():setattr(target,field,value)
             existing={s.id:s for s in target.sections}
             retained=set()
-            for info in snap.get('sections',[]):
-                ident=info.get('id') or str(uuid.uuid4());retained.add(ident)
+            sections=snap.get('sections',[])
+            if not isinstance(sections,list) or len(sections)>200:raise HTTPException(422,'Revision failed current safety validation')
+            for info in sections:
+                if not isinstance(info,dict):raise HTTPException(422,'Revision failed current safety validation')
+                ident=info.get('id') or str(uuid.uuid4())
+                if not _valid_revision_uuid(ident) or ident in retained:raise HTTPException(422,'Revision failed current safety validation')
+                retained.add(ident)
+                selected_section={key:info[key] for key in ('section_key','section_type','position','is_enabled','content') if key in info}
+                section_changes=_validated_model(UpdateSectionInput,selected_section).model_dump(exclude_unset=True)
                 section=existing.get(ident)
                 if not section:
                     section=PageSection(id=ident,page_id=target.id);db.add(section)
-                for key in ('section_key','section_type','position','is_enabled'):
-                    if key in info:setattr(section,key,info[key])
-                if 'content' in info:section.content_json=json_safe(info['content'])
+                if 'content' in section_changes:section.content_json=json_safe(section_changes.pop('content'))
+                for key,value in section_changes.items():setattr(section,key,value)
             for sid,section in existing.items():
                 if sid not in retained:db.delete(section)
         else:
-            from .phase3 import _collection_out
+            from .phase3 import CollectionPatch, _check_media, _collection_out, _safe_content, _set_usage
             db.add(ContentRevision(entity_type=kind,entity_id=target.id,
                     snapshot_json=json_safe(_collection_out(target,db,True)),actor_user_id=actor.id))
-            collision=db.query(CollectionEntry).filter(CollectionEntry.kind==kind,CollectionEntry.slug==snap['slug'],
-                           CollectionEntry.id!=target.id).first()
-            if collision:raise HTTPException(409,'Restoring this version would duplicate a collection slug')
-            for field in ('title','slug','summary','body_markdown','sort_order','is_featured',
-                          'hero_media_id','icon_media_id','seo_title','meta_description'):
-                if field in snap:setattr(target,field,snap[field])
-            if 'content' in snap:target.content_json=json_safe(snap['content'])
+            selected={key:snap[key] for key in ('title','slug','summary','body_markdown','sort_order','is_featured',
+                          'hero_media_id','icon_media_id','seo_title','meta_description','content') if key in snap}
+            changes=_validated_model(CollectionPatch,selected).model_dump(exclude_unset=True)
+            if 'slug' in changes:
+                collision=db.query(CollectionEntry).filter(CollectionEntry.kind==kind,CollectionEntry.slug==changes['slug'],
+                               CollectionEntry.id!=target.id).first()
+                if collision:raise HTTPException(409,'Restoring this version would duplicate a collection slug')
+            _check_media(db,changes.get('hero_media_id',target.hero_media_id),'hero')
+            _check_media(db,changes.get('icon_media_id',target.icon_media_id),'icon')
+            if 'content' in changes:target.content_json=_safe_content(changes.pop('content'))
+            for field,value in changes.items():setattr(target,field,value)
+            if 'hero_media_id' in selected:_set_usage(db,target.hero_media_id,'collection',target.id,'hero')
+            if 'icon_media_id' in selected:_set_usage(db,target.icon_media_id,'collection',target.id,'icon')
     reset_approval(db,kind,target.id)
     audit(db,'content.revision_restored',actor=actor.id,target_type=kind,target_id=target.id,revision_id=row.id)
     db.commit()
