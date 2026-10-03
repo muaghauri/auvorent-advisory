@@ -44,13 +44,34 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if grep -RniE --include='*.js' --include='*.html' \
-            '(^|[^A-Za-z])(innerHTML|outerHTML|insertAdjacentHTML|document\.write|document\.writeln|eval|Function)\s*(=|\()' \
-            frontend; then
-            echo 'Potential executable DOM/HTML sink detected. Use textContent/createElement/replaceChildren or explicitly reviewed safe rendering.'
-            exit 1
-          fi
-          echo 'No prohibited frontend injection sinks detected.'
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          import sys
+
+          patterns = {
+              "innerHTML assignment": re.compile(r"\binnerHTML\s*="),
+              "outerHTML assignment": re.compile(r"\bouterHTML\s*="),
+              "insertAdjacentHTML": re.compile(r"\binsertAdjacentHTML\s*\("),
+              "document.write": re.compile(r"\bdocument\.(?:write|writeln)\s*\("),
+              "eval": re.compile(r"(?<![\w$])eval\s*\("),
+              "Function constructor": re.compile(r"(?<![\w$])Function\s*\("),
+          }
+          findings = []
+          for path in Path("frontend").rglob("*"):
+              if path.suffix not in {".js", ".html"} or not path.is_file():
+                  continue
+              text = path.read_text(encoding="utf-8", errors="replace")
+              for lineno, line in enumerate(text.splitlines(), 1):
+                  for name, pattern in patterns.items():
+                      if pattern.search(line):
+                          findings.append(f"{path}:{lineno}: {name}")
+          if findings:
+              print("Potential executable DOM/HTML sink detected:")
+              print("\n".join(findings))
+              sys.exit(1)
+          print("No prohibited frontend injection sinks detected.")
+          PY
 
       - name: Tracked secret leak check
         shell: bash
