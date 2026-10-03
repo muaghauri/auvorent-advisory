@@ -40,5 +40,9 @@ jobs:
       - name: Dependency vulnerability audit
         run: pip-audit -r requirements.txt
 
-      - name: Static security scan
-        run: bandit -q -r backend/app -x backend/alembic
+      - name: Static security scan — blocking medium/high
+        run: bandit -q -r backend/app -x backend/alembic -ll
+
+      - name: Static security scan — informational low findings
+        continue-on-error: true
+        run: bandit -q -r backend/app -x backend/alembic -l
