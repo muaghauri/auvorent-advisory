@@ -1,24 +1,44 @@
 from __future__ import annotations
-import json, re, uuid
+
+import json
+import re
+import uuid
+from urllib.parse import urlparse
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
-from .models import Page, PageSection, NavigationItem, SiteSetting, ContentRevision, User, MediaUsage
-from .schemas import CreatePageInput, UpdatePageInput, CreateSectionInput, UpdateSectionInput, ReorderSectionsInput, ReplaceNavigationInput, UpdateSettingsInput
-from .security import get_db, require_csrf, require_permission, audit
+
+from .models import ContentRevision, MediaUsage, NavigationItem, Page, PageSection, SiteSetting, User
+from .schemas import (
+    CreatePageInput,
+    CreateSectionInput,
+    ReorderSectionsInput,
+    ReplaceNavigationInput,
+    UpdatePageInput,
+    UpdateSectionInput,
+    UpdateSettingsInput,
+)
+from .security import audit, get_db, require_csrf, require_permission
 
 router = APIRouter(prefix="/api/v1", tags=["Page Studio"])
+CONTROL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
+SAFE_LOCAL_SETTING_URL = re.compile(r"^/[A-Za-z0-9/_\-.%]*$")
+PAGE_STATUSES = {"draft", "unpublished", "archived", "in_review", "approved", "published"}
+
 
 def _page_out(p: Page, include_sections=False):
     data={"id":p.id,"route":p.route,"slug":p.slug,"title":p.title,"template":p.template,"status":p.status,"show_in_navigation":p.show_in_navigation,"is_indexable":p.is_indexable,"seo_title":p.seo_title,"meta_description":p.meta_description,"created_at":p.created_at.isoformat()+"Z","updated_at":p.updated_at.isoformat()+"Z"}
     if include_sections: data["sections"]=[_section_out(s) for s in p.sections]
     return data
 
+
 def _section_out(s: PageSection):
     try: content=json.loads(s.content_json or "{}")
     except json.JSONDecodeError: content={}
     return {"id":s.id,"page_id":s.page_id,"section_key":s.section_key,"section_type":s.section_type,"position":s.position,"is_enabled":s.is_enabled,"content":content,"updated_at":s.updated_at.isoformat()+"Z"}
+
 
 def _norm_route(route:str):
     route=(route or "").strip()
@@ -27,16 +47,78 @@ def _norm_route(route:str):
     if "//" in route or any(c in route for c in "?#") or not re.fullmatch(r"/[A-Za-z0-9/_-]*", route): raise HTTPException(422,"Invalid route")
     return route
 
+
 def _save_revision(db, entity_type, entity_id, snapshot, actor):
     db.add(ContentRevision(entity_type=entity_type, entity_id=entity_id, snapshot_json=json.dumps(snapshot, separators=(",",":"), ensure_ascii=False), actor_user_id=actor.id))
+
+
+def _safe_text_setting(key: str, value, max_length: int) -> str:
+    if not isinstance(value, str):
+        raise HTTPException(422, f"{key} must be text")
+    value=value.strip()
+    if len(value)>max_length or CONTROL.search(value):
+        raise HTTPException(422, f"{key} contains prohibited or oversized content")
+    return value
+
+
+def _safe_local_setting_url(key: str, value) -> str:
+    value=_safe_text_setting(key,value,300)
+    if (
+        not value
+        or not SAFE_LOCAL_SETTING_URL.fullmatch(value)
+        or value.startswith("//")
+        or ".." in value
+        or "\\" in value
+    ):
+        raise HTTPException(422, f"{key} must be a safe website-relative path")
+    return value
+
+
+def _safe_canonical_origin(value) -> str:
+    value=_safe_text_setting("seo.canonical_base",value,300).rstrip("/")
+    parsed=urlparse(value)
+    if (
+        parsed.scheme!="https"
+        or not parsed.hostname
+        or parsed.username
+        or parsed.password
+        or parsed.path not in ("", "/")
+        or parsed.params
+        or parsed.query
+        or parsed.fragment
+    ):
+        raise HTTPException(422,"seo.canonical_base must be a clean HTTPS origin")
+    return value
+
+
+def _validated_setting(key: str, value):
+    text_limits={
+        "brand.display_name":180,
+        "brand.tagline":400,
+        "contact.primary_cta_label":120,
+        "seo.default_title":180,
+        "seo.default_description":320,
+        "footer.copyright":400,
+    }
+    if key in text_limits:
+        return _safe_text_setting(key,value,text_limits[key])
+    if key in {"brand.logo_dark","brand.logo_light","contact.primary_cta_url"}:
+        return _safe_local_setting_url(key,value)
+    if key=="seo.canonical_base":
+        return _safe_canonical_origin(value)
+    raise HTTPException(422,"Unknown setting key")
+
 
 @router.get("/pages")
 def list_pages(search:str=Query("",max_length=120), status:str=Query("",max_length=24), limit:int=Query(100,ge=1,le=200), offset:int=Query(0,ge=0), actor:User=Depends(require_permission("content:edit")), db:Session=Depends(get_db)):
     q=db.query(Page)
     if search: q=q.filter(Page.title.ilike(f"%{search}%") | Page.route.ilike(f"%{search}%"))
-    if status: q=q.filter(Page.status==status)
+    if status:
+        if status not in PAGE_STATUSES: raise HTTPException(422,"Invalid page status")
+        q=q.filter(Page.status==status)
     total=q.count(); rows=q.order_by(Page.route.asc()).offset(offset).limit(limit).all()
     return {"items":[_page_out(p) for p in rows],"total":total,"limit":limit,"offset":offset}
+
 
 @router.post("/pages",status_code=201,dependencies=[Depends(require_csrf)])
 def create_page(payload:CreatePageInput, actor:User=Depends(require_permission("content:edit")), db:Session=Depends(get_db)):
@@ -46,11 +128,13 @@ def create_page(payload:CreatePageInput, actor:User=Depends(require_permission("
     p=Page(id=str(uuid.uuid4()), route=route, slug=payload.slug.strip("/"), title=payload.title.strip(), template=payload.template, status=payload.status, show_in_navigation=payload.show_in_navigation, is_indexable=payload.is_indexable, seo_title=payload.seo_title, meta_description=payload.meta_description)
     db.add(p); audit(db,"page.created",actor=actor.id,target_type="page",target_id=p.id,route=route); db.commit(); return {"page":_page_out(p)}
 
+
 @router.get("/pages/{page_id}")
 def get_page(page_id:str, actor:User=Depends(require_permission("content:edit")), db:Session=Depends(get_db)):
     p=db.get(Page,page_id)
     if not p: raise HTTPException(404,"Page not found")
     return {"page":_page_out(p,True)}
+
 
 @router.patch("/pages/{page_id}",dependencies=[Depends(require_csrf)])
 def update_page(page_id:str,payload:UpdatePageInput,actor:User=Depends(require_permission("content:edit")),db:Session=Depends(get_db)):
@@ -70,6 +154,7 @@ def update_page(page_id:str,payload:UpdatePageInput,actor:User=Depends(require_p
     except IntegrityError: db.rollback(); raise HTTPException(409,"Route already exists")
     return {"page":_page_out(p,True)}
 
+
 @router.delete("/pages/{page_id}",dependencies=[Depends(require_csrf)])
 def delete_page(page_id:str,actor:User=Depends(require_permission("settings:manage")),db:Session=Depends(get_db)):
     p=db.get(Page,page_id)
@@ -79,10 +164,12 @@ def delete_page(page_id:str,actor:User=Depends(require_permission("settings:mana
         db.query(MediaUsage).filter(MediaUsage.owner_type=="page_section",MediaUsage.owner_id==section.id).delete()
     audit(db,"page.deleted",actor=actor.id,target_type="page",target_id=p.id,route=p.route); db.delete(p); db.commit(); return {"status":"deleted"}
 
+
 @router.get("/pages/{page_id}/sections")
 def list_sections(page_id:str,actor:User=Depends(require_permission("content:edit")),db:Session=Depends(get_db)):
     if not db.get(Page,page_id): raise HTTPException(404,"Page not found")
     rows=db.query(PageSection).filter(PageSection.page_id==page_id).order_by(PageSection.position.asc()).all(); return {"items":[_section_out(s) for s in rows]}
+
 
 @router.post("/pages/{page_id}/sections",status_code=201,dependencies=[Depends(require_csrf)])
 def create_section(page_id:str,payload:CreateSectionInput,actor:User=Depends(require_permission("content:edit")),db:Session=Depends(get_db)):
@@ -91,6 +178,7 @@ def create_section(page_id:str,payload:CreateSectionInput,actor:User=Depends(req
     from .phase5 import reset_approval
     reset_approval(db,'page',page_id)
     db.add(s); audit(db,"section.created",actor=actor.id,target_type="section",target_id=s.id,page_id=page_id); db.commit(); return {"section":_section_out(s)}
+
 
 @router.patch("/pages/{page_id}/sections/{section_id}",dependencies=[Depends(require_csrf)])
 def update_section(page_id:str,section_id:str,payload:UpdateSectionInput,actor:User=Depends(require_permission("content:edit")),db:Session=Depends(get_db)):
@@ -104,6 +192,7 @@ def update_section(page_id:str,section_id:str,payload:UpdateSectionInput,actor:U
     for k,v in changes.items(): setattr(s,k,v)
     audit(db,"section.updated",actor=actor.id,target_type="section",target_id=s.id,fields=list(payload.model_dump(exclude_unset=True).keys())); db.commit(); return {"section":_section_out(s)}
 
+
 @router.delete("/pages/{page_id}/sections/{section_id}",dependencies=[Depends(require_csrf)])
 def delete_section(page_id:str,section_id:str,actor:User=Depends(require_permission("content:edit")),db:Session=Depends(get_db)):
     s=db.get(PageSection,section_id)
@@ -112,6 +201,7 @@ def delete_section(page_id:str,section_id:str,actor:User=Depends(require_permiss
     reset_approval(db,'page',page_id)
     db.query(MediaUsage).filter(MediaUsage.owner_type=="page_section",MediaUsage.owner_id==s.id).delete()
     audit(db,"section.deleted",actor=actor.id,target_type="section",target_id=s.id,page_id=page_id); db.delete(s); db.commit(); return {"status":"deleted"}
+
 
 @router.post("/pages/{page_id}/sections/reorder",dependencies=[Depends(require_csrf)])
 def reorder_sections(page_id:str,payload:ReorderSectionsInput,actor:User=Depends(require_permission("content:edit")),db:Session=Depends(get_db)):
@@ -122,9 +212,11 @@ def reorder_sections(page_id:str,payload:ReorderSectionsInput,actor:User=Depends
     for i,sid in enumerate(payload.section_ids): by[sid].position=i
     audit(db,"sections.reordered",actor=actor.id,target_type="page",target_id=page_id,count=len(by)); db.commit(); return {"items":[_section_out(by[sid]) for sid in payload.section_ids]}
 
+
 @router.get("/navigation")
 def get_navigation(actor:User=Depends(require_permission("content:edit")),db:Session=Depends(get_db)):
     rows=db.query(NavigationItem).order_by(NavigationItem.location,NavigationItem.position).all(); return {"items":[{"id":r.id,"location":r.location,"label":r.label,"url":r.url,"position":r.position,"is_visible":r.is_visible,"open_new_tab":r.open_new_tab} for r in rows]}
+
 
 @router.patch("/navigation",dependencies=[Depends(require_csrf)])
 def replace_navigation(payload:ReplaceNavigationInput,actor:User=Depends(require_permission("content:edit")),db:Session=Depends(get_db)):
@@ -132,13 +224,15 @@ def replace_navigation(payload:ReplaceNavigationInput,actor:User=Depends(require
     for i,item in enumerate(payload.items): db.add(NavigationItem(id=item.id or str(uuid.uuid4()),location=item.location,label=item.label,url=item.url,position=item.position if item.position is not None else i,is_visible=item.is_visible,open_new_tab=item.open_new_tab))
     audit(db,"navigation.replaced",actor=actor.id,target_type="navigation",target_id="global",count=len(payload.items)); db.commit(); return get_navigation(actor,db)
 
+
 @router.get("/settings")
 def get_settings(actor:User=Depends(require_permission("content:edit")),db:Session=Depends(get_db)):
-    rows=db.query(SiteSetting).order_by(SiteSetting.group_name,SiteSetting.key).all(); values={};
+    rows=db.query(SiteSetting).order_by(SiteSetting.group_name,SiteSetting.key).all(); values={}
     for r in rows:
         try: values[r.key]=json.loads(r.value_json)
         except json.JSONDecodeError: values[r.key]=None
     return {"values":values,"items":[{"key":r.key,"group":r.group_name} for r in rows]}
+
 
 @router.patch("/settings",dependencies=[Depends(require_csrf)])
 def update_settings(payload:UpdateSettingsInput,actor:User=Depends(require_permission("settings:manage")),db:Session=Depends(get_db)):
@@ -146,11 +240,15 @@ def update_settings(payload:UpdateSettingsInput,actor:User=Depends(require_permi
     unknown=[k for k in payload.values if k not in allowed]
     if unknown: raise HTTPException(422,detail={"message":"Unknown setting keys","keys":unknown})
     before={}
-    for key,val in payload.values.items():
-        row=db.get(SiteSetting,key); before[key]=json.loads(row.value_json) if row else None
+    validated={key:_validated_setting(key,val) for key,val in payload.values.items()}
+    for key,val in validated.items():
+        row=db.get(SiteSetting,key)
+        try: before[key]=json.loads(row.value_json) if row else None
+        except (json.JSONDecodeError,TypeError): before[key]=None
         if not row: row=SiteSetting(key=key,group_name=allowed[key],value_json="null"); db.add(row)
         row.value_json=json.dumps(val,ensure_ascii=False); row.group_name=allowed[key]
-    _save_revision(db,"settings","global",before,actor); audit(db,"settings.updated",actor=actor.id,target_type="settings",target_id="global",keys=list(payload.values)); db.commit(); return get_settings(actor,db)
+    _save_revision(db,"settings","global",before,actor); audit(db,"settings.updated",actor=actor.id,target_type="settings",target_id="global",keys=list(validated)); db.commit(); return get_settings(actor,db)
+
 
 @router.get("/content/revisions")
 def revisions(entity_type:str=Query("",max_length=40),entity_id:str=Query("",max_length=80),limit:int=Query(50,ge=1,le=100),actor:User=Depends(require_permission("content:edit")),db:Session=Depends(get_db)):
