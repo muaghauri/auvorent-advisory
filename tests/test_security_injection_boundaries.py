@@ -13,7 +13,7 @@ from backend.app.schemas import (
     ReorderSectionsInput,
     UpdateSettingsInput,
 )
-from backend.app.security import current_user, require_csrf
+from backend.app.security import PERMISSIONS, current_user, require_csrf
 
 
 def _dependency_calls(route: APIRoute):
@@ -24,6 +24,14 @@ def _dependency_calls(route: APIRoute):
         calls.append(dep.call)
         stack.extend(dep.dependencies)
     return calls
+
+
+def _required_permissions(route: APIRoute):
+    return {
+        permission
+        for call in _dependency_calls(route)
+        if (permission := getattr(call, "required_permission", None))
+    }
 
 
 def test_navigation_blocks_script_and_protocol_relative_urls():
@@ -158,6 +166,58 @@ def test_every_nonpublic_api_route_is_bound_to_authentication(app):
         if not has_auth:
             missing.append(route.path)
     assert missing == [], f"Private API routes missing authentication/permission binding: {missing}"
+
+
+def test_sensitive_endpoints_keep_exact_server_side_permissions(app):
+    expected = {
+        ("GET", "/api/v1/users"): "users:manage",
+        ("POST", "/api/v1/users"): "users:manage",
+        ("PATCH", "/api/v1/users/{user_id}"): "users:manage",
+        ("POST", "/api/v1/users/{user_id}/reset-password"): "users:manage",
+        ("GET", "/api/v1/audit"): "audit:read",
+        ("DELETE", "/api/v1/pages/{page_id}"): "settings:manage",
+        ("PATCH", "/api/v1/settings"): "settings:manage",
+        ("PATCH", "/api/v1/forms/settings"): "settings:manage",
+        ("POST", "/api/v1/media"): "media:manage",
+        ("PATCH", "/api/v1/media/{media_id}"): "media:manage",
+        ("POST", "/api/v1/media/{media_id}/replace"): "media:manage",
+        ("DELETE", "/api/v1/media/{media_id}"): "media:manage",
+        ("POST", "/api/v1/reviews/{review_id}/decision"): "content:approve",
+        ("POST", "/api/v1/publishing/build"): "content:publish",
+        ("POST", "/api/v1/publishing/run-due"): "content:publish",
+        ("POST", "/api/v1/publishing/rollback/{release_id}"): "content:publish",
+        ("POST", "/api/v1/integration/export-production"): "content:publish",
+    }
+    routes = {
+        (method, route.path): route
+        for route in app.routes
+        if isinstance(route, APIRoute)
+        for method in (route.methods or set())
+    }
+    missing=[]
+    incorrect=[]
+    for key, permission in expected.items():
+        route=routes.get(key)
+        if route is None:
+            missing.append(key)
+            continue
+        permissions=_required_permissions(route)
+        if permission not in permissions:
+            incorrect.append((key, permission, sorted(permissions)))
+    assert missing == [], f"Expected sensitive routes disappeared or changed method/path: {missing}"
+    assert incorrect == [], f"Sensitive routes lost required RBAC bindings: {incorrect}"
+
+
+def test_privileged_permissions_are_not_inherited_by_lower_roles():
+    assert "users:manage" in PERMISSIONS["super_admin"]
+    assert "audit:read" in PERMISSIONS["super_admin"]
+    for role in ("admin", "editor", "reviewer", "viewer"):
+        assert "users:manage" not in PERMISSIONS[role]
+        assert "audit:read" not in PERMISSIONS[role]
+    for role in ("editor", "reviewer", "viewer"):
+        assert "settings:manage" not in PERMISSIONS[role]
+        assert "content:publish" not in PERMISSIONS[role]
+        assert "media:manage" not in PERMISSIONS[role]
 
 
 def test_public_lead_frontend_does_not_use_raw_html_sinks():
