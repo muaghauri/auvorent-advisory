@@ -40,6 +40,18 @@ jobs:
       - name: Dependency vulnerability audit
         run: pip-audit -r requirements.txt
 
+      - name: Frontend injection sink check
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -RniE --include='*.js' --include='*.html' \
+            '(^|[^A-Za-z])(innerHTML|outerHTML|insertAdjacentHTML|document\.write|document\.writeln|eval|Function)\s*(=|\()' \
+            frontend; then
+            echo 'Potential executable DOM/HTML sink detected. Use textContent/createElement/replaceChildren or explicitly reviewed safe rendering.'
+            exit 1
+          fi
+          echo 'No prohibited frontend injection sinks detected.'
+
       - name: Static security scan — blocking medium/high
         run: bandit -q -r backend/app -x backend/alembic -ll
 
