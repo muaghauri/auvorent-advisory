@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytest
+from fastapi.routing import APIRoute
 from pydantic import ValidationError
 
 from backend.app.phase6_renderer import clean_fragment, safe_local_url
@@ -11,6 +12,17 @@ from backend.app.schemas import (
     ReorderSectionsInput,
     UpdateSettingsInput,
 )
+from backend.app.security import current_user, require_csrf
+
+
+def _dependency_calls(route: APIRoute):
+    calls = []
+    stack = list(route.dependant.dependencies)
+    while stack:
+        dep = stack.pop()
+        calls.append(dep.call)
+        stack.extend(dep.dependencies)
+    return calls
 
 
 def test_navigation_blocks_script_and_protocol_relative_urls():
@@ -89,3 +101,51 @@ def test_public_site_header_policy_covers_admin_api_and_clickjacking():
     assert "frame-ancestors 'none'" in lower
     assert "object-src 'none'" in lower
     assert "https://admin.auvorent.com" in headers
+
+
+def test_every_private_mutation_is_bound_to_csrf(app):
+    mutating = {"POST", "PUT", "PATCH", "DELETE"}
+    public_exemptions = {
+        "/api/v1/public/forms/{slug}/submit",
+        "/api/v1/public/assessments/{slug}/evaluate",
+    }
+    missing = []
+    for route in app.routes:
+        if not isinstance(route, APIRoute) or not route.path.startswith("/api/v1/"):
+            continue
+        methods = set(route.methods or ()) & mutating
+        if not methods or route.path in public_exemptions:
+            continue
+        if require_csrf not in _dependency_calls(route):
+            missing.append((sorted(methods), route.path))
+    assert missing == [], f"Private state-changing routes missing CSRF binding: {missing}"
+
+
+def test_every_nonpublic_api_route_is_bound_to_authentication(app):
+    public_paths = {
+        "/api/v1/health",
+        "/api/v1/auth/csrf",
+        "/api/v1/auth/login",
+        "/api/v1/public/forms/{slug}",
+        "/api/v1/public/forms/{slug}/submit",
+        "/api/v1/public/assessments/{slug}",
+        "/api/v1/public/assessments/{slug}/evaluate",
+    }
+    missing = []
+    for route in app.routes:
+        if not isinstance(route, APIRoute) or not route.path.startswith("/api/v1/") or route.path in public_paths:
+            continue
+        calls = _dependency_calls(route)
+        has_auth = current_user in calls or any(getattr(call, "__name__", "") == "check" for call in calls)
+        if not has_auth:
+            missing.append(route.path)
+    assert missing == [], f"Private API routes missing authentication/permission binding: {missing}"
+
+
+def test_public_lead_frontend_does_not_use_raw_html_sinks():
+    root = Path(__file__).resolve().parents[1]
+    for relative in ("seed/v6_assets/cms-public.js", "frontend/assets/phase4.js"):
+        source = (root / relative).read_text(encoding="utf-8")
+        assert ".innerHTML" not in source
+        assert "insertAdjacentHTML" not in source
+        assert "document.write" not in source
