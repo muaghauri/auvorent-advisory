@@ -177,7 +177,7 @@ def test_sensitive_handlers_keep_exact_server_side_permissions(app):
         "audit_events": "audit:read",
         "delete_page": "settings:manage",
         "update_settings": "settings:manage",
-        "lead_settings_update": "settings:manage",
+        "update_lead_settings": "settings:manage",
         "upload_media": "media:manage",
         "patch_media": "media:manage",
         "replace_media": "media:manage",
