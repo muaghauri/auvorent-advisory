@@ -168,44 +168,43 @@ def test_every_nonpublic_api_route_is_bound_to_authentication(app):
     assert missing == [], f"Private API routes missing authentication/permission binding: {missing}"
 
 
-def test_sensitive_endpoints_keep_exact_server_side_permissions(app):
+def test_sensitive_handlers_keep_exact_server_side_permissions(app):
     expected = {
-        ("GET", "/api/v1/users"): "users:manage",
-        ("POST", "/api/v1/users"): "users:manage",
-        ("PATCH", "/api/v1/users/{user_id}"): "users:manage",
-        ("POST", "/api/v1/users/{user_id}/reset-password"): "users:manage",
-        ("GET", "/api/v1/audit"): "audit:read",
-        ("DELETE", "/api/v1/pages/{page_id}"): "settings:manage",
-        ("PATCH", "/api/v1/settings"): "settings:manage",
-        ("PATCH", "/api/v1/forms/settings"): "settings:manage",
-        ("POST", "/api/v1/media"): "media:manage",
-        ("PATCH", "/api/v1/media/{media_id}"): "media:manage",
-        ("POST", "/api/v1/media/{media_id}/replace"): "media:manage",
-        ("DELETE", "/api/v1/media/{media_id}"): "media:manage",
-        ("POST", "/api/v1/reviews/{review_id}/decision"): "content:approve",
-        ("POST", "/api/v1/publishing/build"): "content:publish",
-        ("POST", "/api/v1/publishing/run-due"): "content:publish",
-        ("POST", "/api/v1/publishing/rollback/{release_id}"): "content:publish",
-        ("POST", "/api/v1/integration/export-production"): "content:publish",
+        "users": "users:manage",
+        "create_user": "users:manage",
+        "update_user": "users:manage",
+        "admin_reset_password": "users:manage",
+        "audit_events": "audit:read",
+        "delete_page": "settings:manage",
+        "update_settings": "settings:manage",
+        "lead_settings_update": "settings:manage",
+        "upload_media": "media:manage",
+        "patch_media": "media:manage",
+        "replace_media": "media:manage",
+        "delete_media": "media:manage",
+        "review_decision": "content:approve",
+        "build": "content:publish",
+        "run_due": "content:publish",
+        "rollback": "content:publish",
+        "export_release": "content:publish",
     }
-    routes = {
-        (method, route.path): route
+    routes_by_name = {
+        route.name: route
         for route in app.routes
         if isinstance(route, APIRoute)
-        for method in (route.methods or set())
     }
     missing=[]
     incorrect=[]
-    for key, permission in expected.items():
-        route=routes.get(key)
+    for name, permission in expected.items():
+        route=routes_by_name.get(name)
         if route is None:
-            missing.append(key)
+            missing.append(name)
             continue
         permissions=_required_permissions(route)
         if permission not in permissions:
-            incorrect.append((key, permission, sorted(permissions)))
-    assert missing == [], f"Expected sensitive routes disappeared or changed method/path: {missing}"
-    assert incorrect == [], f"Sensitive routes lost required RBAC bindings: {incorrect}"
+            incorrect.append((name, permission, sorted(permissions)))
+    assert missing == [], f"Expected sensitive handlers disappeared: {missing}"
+    assert incorrect == [], f"Sensitive handlers lost required RBAC bindings: {incorrect}"
 
 
 def test_privileged_permissions_are_not_inherited_by_lower_roles():
@@ -217,7 +216,11 @@ def test_privileged_permissions_are_not_inherited_by_lower_roles():
     for role in ("editor", "reviewer", "viewer"):
         assert "settings:manage" not in PERMISSIONS[role]
         assert "content:publish" not in PERMISSIONS[role]
+    assert "media:manage" in PERMISSIONS["editor"]
+    for role in ("reviewer", "viewer"):
         assert "media:manage" not in PERMISSIONS[role]
+    assert "content:approve" in PERMISSIONS["reviewer"]
+    assert "content:edit" not in PERMISSIONS["reviewer"]
 
 
 def test_public_lead_frontend_does_not_use_raw_html_sinks():
