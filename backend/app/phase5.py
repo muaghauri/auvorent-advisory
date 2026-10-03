@@ -35,6 +35,15 @@ SCHEMAS={'WebPage','Article','Service','Organization','AboutPage','ContactPage',
 ROOT=Path(__file__).resolve().parents[2]
 SEED=(ROOT/'seed'/'v6_page_content.json')
 PUBLISH_LOCK=threading.RLock()
+_PREVIEW_TOKEN_RE=re.compile(r'^[A-Za-z0-9_-]{32,128}$')
+_RELEASE_ID_RE=re.compile(r'^[0-9a-f]{32}$')
+_PUBLIC_REPORT_KEYS={'release_id','published_count','skipped_non_public_collections','sitemap_url_count','staging_only','restored_release_id'}
+_SAFE_FAILURE_PREFIXES=(
+    'Nothing approved to publish',
+    'Approval stale or missing for ',
+    'SEO blocks ',
+    'Generated HTML missing critical SEO elements',
+)
 
 
 def json_safe(value):
@@ -180,6 +189,18 @@ class NoteInput(BaseModel):
     note:str=Field(default='',max_length=1000)
 
 
+class ReviewDecisionInput(BaseModel):
+    model_config=ConfigDict(extra='forbid')
+    decision:str=Field(max_length=16)
+    note:str=Field(default='',max_length=1000)
+
+    @field_validator('decision')
+    @classmethod
+    def valid_decision(cls,value):
+        if value not in {'approve','reject'}:raise ValueError('Decision must be approve or reject')
+        return value
+
+
 class RedirectInput(BaseModel):
     model_config=ConfigDict(extra='forbid')
     old_path:str=Field(min_length=2,max_length=255)
@@ -277,9 +298,8 @@ def reviews(state:str=Query('',max_length=24),actor:User=Depends(require_permiss
 
 
 @router.post('/reviews/{review_id}/decision',dependencies=[Depends(require_csrf)])
-def review_decision(review_id:str,payload:dict,actor:User=Depends(require_permission('content:approve')),db:Session=Depends(get_db)):
-    decision=payload.get('decision');note=str(payload.get('note',''))[:1000]
-    if decision not in {'approve','reject'}:raise HTTPException(422,'Decision must be approve or reject')
+def review_decision(review_id:str,payload:ReviewDecisionInput,actor:User=Depends(require_permission('content:approve')),db:Session=Depends(get_db)):
+    decision=payload.decision;note=payload.note
     r=db.get(EditorialReview,review_id)
     if not r or r.state!='in_review':raise HTTPException(409,'Review unavailable or already decided')
     if r.requested_by==actor.id:
@@ -320,6 +340,7 @@ def preview_media(media_id:str,request:Request,actor:User=Depends(require_permis
 
 @router.get('/preview/view/{token}',response_class=HTMLResponse,include_in_schema=False)
 def view_preview(token:str,actor:User=Depends(require_permission('content:read')),db:Session=Depends(get_db)):
+    if not _PREVIEW_TOKEN_RE.fullmatch(token or ''):raise HTTPException(404,'Preview expired')
     row=db.query(PrivatePreview).filter_by(token_hash=hashlib.sha256(token.encode()).hexdigest()).first()
     if not row or row.expires_at < utcnow():raise HTTPException(404,'Preview expired')
     snap=json.loads(row.snapshot_json)
@@ -446,11 +467,26 @@ def stage_root(request):
     return request.app.state.publish_root
 
 
+def _safe_failure_text(value):
+    if value is None:return None
+    text=str(value).strip()
+    for prefix in _SAFE_FAILURE_PREFIXES:
+        if text.startswith(prefix):return text[:500]
+    return 'Publication failed safely; no staging release was changed'
+
+
+def _safe_report(raw):
+    try:data=json.loads(raw or '{}')
+    except (TypeError,json.JSONDecodeError):return {}
+    if not isinstance(data,dict):return {}
+    return {key:data[key] for key in _PUBLIC_REPORT_KEYS if key in data}
+
+
 def deployment_out(job):
     return {'id':job.id,'release_id':job.release_id,'status':job.status,'environment':job.environment,
             'scheduled_for':job.scheduled_for.isoformat()+'Z' if job.scheduled_for else None,
             'created_at':job.created_at.isoformat()+'Z','completed_at':job.completed_at.isoformat()+'Z' if job.completed_at else None,
-            'error_message':job.error_message,'report':json.loads(job.report_json or '{}')}
+            'error_message':_safe_failure_text(job.error_message),'report':_safe_report(job.report_json)}
 
 
 def active_release(root:Path):
@@ -462,11 +498,22 @@ def active_release(root:Path):
 
 
 def switch_release(root:Path,target:Path):
-    if target.parent.resolve()!=(root/'releases').resolve() or not target.is_dir():
+    releases=(root/'releases').resolve()
+    if target.is_symlink():raise RuntimeError('Invalid managed release')
+    resolved=target.resolve()
+    if resolved.parent!=releases or not resolved.is_dir():
         raise RuntimeError('Invalid managed release')
     link=root/('.next-'+uuid.uuid4().hex)
-    link.symlink_to(target.resolve(),target_is_directory=True)
+    link.symlink_to(resolved,target_is_directory=True)
     os.replace(link,root/'current')
+
+
+def _valid_release_manifest(target:Path,release_id:str):
+    manifest=target/'manifest.json'
+    if manifest.is_symlink() or not manifest.is_file():return False
+    try:data=json.loads(manifest.read_text(encoding='utf-8'))
+    except (OSError,TypeError,json.JSONDecodeError):return False
+    return isinstance(data,dict) and data.get('release_id')==release_id and data.get('environment')=='local_staging'
 
 
 def compile_release(db:Session,root:Path,job:PublishDeployment,media_root:Path|None=None):
@@ -557,7 +604,7 @@ def compile_release(db:Session,root:Path,job:PublishDeployment,media_root:Path|N
         for kind,id,route,review_id in approved:
             entity(db,kind,id).status='published'
         return {'release_id':release_id,'published_count':len(approved),'skipped_non_public_collections':skipped,
-                'sitemap_url_count':len(set(urls)),'output_dir':str(target),'staging_only':True}
+                'sitemap_url_count':len(set(urls)),'staging_only':True}
     except Exception:
         # Leave previously active release intact if anything fails before pointer swap.
         if active_release(root)!=target:shutil.rmtree(target,ignore_errors=True)
@@ -582,7 +629,7 @@ def perform_publish(db,root,job,media_root=None):
                 if previous:switch_release(root,previous)
                 else:(root/'current').unlink(missing_ok=True)
             existing=db.get(PublishDeployment,job.id)
-            existing.status='failed';existing.error_message=str(exc)[:1000];existing.completed_at=utcnow()
+            existing.status='failed';existing.error_message=_safe_failure_text(exc);existing.completed_at=utcnow()
             audit(db,'publish.failed',actor=existing.requested_by,target_type='deployment',target_id=existing.id,reason=existing.error_message)
             db.commit()
         return db.get(PublishDeployment,job.id)
@@ -615,20 +662,29 @@ def deployments(actor:User=Depends(require_permission('content:read')),db:Sessio
 @router.get('/publishing/current')
 def current_release(request:Request,actor:User=Depends(require_permission('content:read'))):
     release=active_release(stage_root(request))
-    return {'release_id':release.name if release else None,'staging_only':True,
-            'local_path':str(release) if release else None}
+    return {'release_id':release.name if release else None,'staging_only':True}
 
 
 @router.post('/publishing/rollback/{release_id}',dependencies=[Depends(require_csrf)])
 def rollback(release_id:str,request:Request,actor:User=Depends(require_permission('content:publish')),db:Session=Depends(get_db)):
     root=stage_root(request);target=root/'releases'/release_id
-    if not re.fullmatch(r'[0-9a-f]{32}',release_id) or not target.is_dir():raise HTTPException(404,'Managed release not found')
+    known=db.query(PublishDeployment).filter_by(release_id=release_id,status='completed').first() if _RELEASE_ID_RE.fullmatch(release_id or '') else None
+    if not known or target.is_symlink() or not target.is_dir() or not _valid_release_manifest(target,release_id):
+        raise HTTPException(404,'Managed release not found')
     with PUBLISH_LOCK:
-        switch_release(root,target)
-        job=PublishDeployment(id=str(uuid.uuid4()),release_id=None,status='rolled_back',environment='local_staging',
-             requested_by=actor.id,report_json=json_safe({'restored_release_id':release_id,'staging_only':True}),completed_at=utcnow())
-        db.add(job);audit(db,'publish.rolled_back',actor=actor.id,target_type='deployment',target_id=job.id,release=release_id)
-        db.commit()
+        previous=active_release(root)
+        try:
+            switch_release(root,target)
+            job=PublishDeployment(id=str(uuid.uuid4()),release_id=release_id,status='rolled_back',environment='local_staging',
+                 requested_by=actor.id,report_json=json_safe({'restored_release_id':release_id,'staging_only':True}),completed_at=utcnow())
+            db.add(job);audit(db,'publish.rolled_back',actor=actor.id,target_type='deployment',target_id=job.id,release=release_id)
+            db.commit()
+        except Exception:
+            db.rollback()
+            if active_release(root)!=previous:
+                if previous:switch_release(root,previous)
+                else:(root/'current').unlink(missing_ok=True)
+            raise
     return {'restored_release_id':release_id,'staging_only':True}
 
 @router.get('/publishing/entities')
@@ -727,9 +783,11 @@ def browse_local_staging(subpath:str,request:Request,actor:User=Depends(require_
     """Authenticated browser view of current staging release; not a public host."""
     root=active_release(stage_root(request))
     if not root:raise HTTPException(404,'No staging release is active')
+    root=root.resolve()
     candidate=(root/subpath).resolve()
-    if not candidate.is_relative_to(root.resolve()):raise HTTPException(404,'Invalid path')
-    if candidate.is_dir():candidate=candidate/'index.html'
+    if not candidate.is_relative_to(root):raise HTTPException(404,'Invalid path')
+    if candidate.is_dir():candidate=(candidate/'index.html').resolve()
+    if not candidate.is_relative_to(root):raise HTTPException(404,'Invalid path')
     if not candidate.is_file():raise HTTPException(404,'File not found in staging release')
     if candidate.suffix.lower()=='.html':
         source=candidate.read_text(encoding='utf-8')
