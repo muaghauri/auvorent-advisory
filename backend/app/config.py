@@ -23,13 +23,8 @@ def _bounded_int(name: str, default: int, minimum: int, maximum: int) -> int:
 def _weak_secret(key: str) -> bool:
     normalized = key.strip().lower()
     known = {
-        "change-me",
-        "changeme",
-        "development",
-        "development-secret",
-        "replace-me",
-        "secret",
-        "supersecret",
+        "change-me", "changeme", "development", "development-secret",
+        "replace-me", "secret", "supersecret",
     }
     return (
         len(key) < 32
@@ -73,6 +68,7 @@ class Settings:
     publish_root: str = ""
     public_site_origin: str = ""
     public_form_rate_limit: int = 8
+    resend_api_key: str = ""
     smtp_host: str = ""
     smtp_port: int = 587
     smtp_username: str = ""
@@ -121,6 +117,7 @@ class Settings:
             publish_root=os.getenv("CMS_PUBLISH_ROOT", ""),
             public_site_origin=public_site_origin,
             public_form_rate_limit=_bounded_int("CMS_PUBLIC_FORM_RATE_LIMIT", 8, 1, 100),
+            resend_api_key=os.getenv("CMS_RESEND_API_KEY", "").strip(),
             smtp_host=os.getenv("CMS_SMTP_HOST", "").strip(),
             smtp_port=_bounded_int("CMS_SMTP_PORT", 587, 1, 65535),
             smtp_username=os.getenv("CMS_SMTP_USERNAME", ""),
