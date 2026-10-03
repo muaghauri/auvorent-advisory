@@ -78,6 +78,26 @@ def _sanitize_audit_value(value, *, key: str = ""):
     return str(value)[:500]
 
 
+def sanitize_audit_detail(detail: str | None) -> str:
+    """Return bounded, re-redacted JSON for audit API responses.
+
+    New audit writes are sanitized before storage, but older rows may predate
+    that protection. Re-sanitizing at the read boundary prevents historical
+    credentials or tokens from being exposed by the privileged audit endpoint.
+    Malformed/non-object legacy detail is discarded rather than echoed.
+    """
+    if not detail:
+        return "{}"
+    try:
+        parsed = json.loads(detail)
+    except (TypeError, json.JSONDecodeError):
+        return "{}"
+    if not isinstance(parsed, dict):
+        return "{}"
+    safe = _sanitize_audit_value(parsed)
+    return json.dumps(safe, separators=(",", ":"), sort_keys=True)
+
+
 def audit(db: Session, action: str, actor: str | None = None, target_type: str = "system", target_id: str | None = None, **details) -> None:
     # Defense in depth: callers should never pass credentials, but redact likely
     # sensitive values centrally in case a future code path does so accidentally.
