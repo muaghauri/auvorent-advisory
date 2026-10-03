@@ -382,7 +382,7 @@ def redirects(actor:User=Depends(require_permission('content:read')),db:Session=
 @router.post('/redirects',dependencies=[Depends(require_csrf)],status_code=201)
 def create_redirect(payload:RedirectInput,actor:User=Depends(require_permission('content:edit')),db:Session=Depends(get_db)):
     if payload.old_path==payload.new_path or redirect_cycle(db,payload.old_path,payload.new_path):raise HTTPException(422,'Redirect loop detected')
-    if db.query(RedirectRule).filter_by(old_path=payload.old_path).first():raise HTTPException(409,'Redirect already exists')
+    if db.query(RedirectRule).filter_by(old_path=payload.old_path).first(): raise HTTPException(409,"Redirect already exists")
     row=RedirectRule(id=str(uuid.uuid4()),**payload.model_dump())
     db.add(row);audit(db,'redirect.created',actor=actor.id,target_type='redirect',target_id=row.id);db.commit()
     return {'redirect':redirect_out(row)}
@@ -549,13 +549,16 @@ def _manifest_items(release:Path|None):
 
 
 def _prune_nonpublic_routes(db:Session,target:Path,old:Path|None):
+    """Remove only routes that were previously CMS-published but are no longer public.
+
+    The V6 baseline intentionally contains static, non-CMS-published pages. Those
+    pages must remain present until they have actually entered the CMS publishing
+    lifecycle; otherwise a first publish of one page would erase the rest of the
+    approved V6 website shell.
+    """
     public_status={'published','approved'}
     rows=[('page',p) for p in db.query(Page).all()]+[(c.kind,c) for c in db.query(CollectionEntry).all() if c.kind in PUBLIC_COLLECTION_TYPES]
     by_key={(kind,row.id):row for kind,row in rows}
-    for kind,row in rows:
-        if row.status not in public_status:
-            try:_route_file(target,entity_route(row,kind)).unlink(missing_ok=True)
-            except ValueError:raise RuntimeError('Invalid managed route')
     for item in _manifest_items(old):
         if not isinstance(item,dict):continue
         kind=item.get('type');ident=item.get('id');route=item.get('route')
@@ -563,16 +566,6 @@ def _prune_nonpublic_routes(db:Session,target:Path,old:Path|None):
         row=by_key.get((kind,ident))
         keep=bool(row and row.status in public_status and entity_route(row,kind)==route)
         if not keep:
-            try:_route_file(target,route).unlink(missing_ok=True)
-            except ValueError:raise RuntimeError('Invalid managed route')
-    # V6 seed pages are CMS-managed. A deleted/unpublished seed page must not
-    # silently reappear just because the immutable baseline contains its HTML.
-    try:seed_routes={p.get('route') for p in json.loads(SEED.read_text(encoding='utf-8')).get('pages',[]) if isinstance(p,dict)}
-    except (OSError,TypeError,json.JSONDecodeError):seed_routes=set()
-    page_by_route={p.route:p for p in db.query(Page).all()}
-    for route in seed_routes:
-        row=page_by_route.get(route)
-        if not row or row.status not in public_status:
             try:_route_file(target,route).unlink(missing_ok=True)
             except ValueError:raise RuntimeError('Invalid managed route')
 
